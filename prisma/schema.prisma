@@ -1,0 +1,54 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Menu {
+  id Int @id @default(autoincrement())
+
+  code String @unique
+
+  mainText String?
+  subText  String?
+
+  items MenuItemPerMenu[]
+}
+
+model MenuItem {
+  id Int @id @default(autoincrement())
+
+  code      String  @unique
+  text      String
+  icon      String
+  iconColor String
+  isFolder  Boolean
+
+  params Json?
+
+  placements MenuItemPerMenu[]
+}
+
+model MenuItemPerMenu {
+  id Int @id @default(autoincrement())
+
+  menuId Int
+  menu   Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  menuItemId Int
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  parentId Int?
+  parent   MenuItemPerMenu?  @relation("MenuPlacementTree", fields: [parentId], references: [id])
+  items    MenuItemPerMenu[] @relation("MenuPlacementTree")
+
+  order Int @default(0)
+
+  @@unique([menuId, menuItemId])
+  @@index([menuId])
+  @@index([parentId])
+}
