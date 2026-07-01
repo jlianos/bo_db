@@ -90,7 +90,8 @@ export const MenuItemScalarFieldEnum = {
     text: 'text',
     icon: 'icon',
     iconColor: 'iconColor',
-    isFolder: 'isFolder'
+    isFolder: 'isFolder',
+    params: 'params'
 };
 export const MenuItemPerMenuScalarFieldEnum = {
     id: 'id',
@@ -103,9 +104,22 @@ export const SortOrder = {
     asc: 'asc',
     desc: 'desc'
 };
+export const NullableJsonNullValueInput = {
+    DbNull: DbNull,
+    JsonNull: JsonNull
+};
 export const NullsOrder = {
     first: 'first',
     last: 'last'
+};
+export const JsonNullValueFilter = {
+    DbNull: DbNull,
+    JsonNull: JsonNull,
+    AnyNull: AnyNull
+};
+export const QueryMode = {
+    default: 'default',
+    insensitive: 'insensitive'
 };
 export const defineExtension = runtime.Extensions.defineExtension;
 //# sourceMappingURL=prismaNamespace.js.map

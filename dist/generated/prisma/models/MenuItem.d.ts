@@ -41,6 +41,7 @@ export type MenuItemCountAggregateOutputType = {
     icon: number;
     iconColor: number;
     isFolder: number;
+    params: number;
     _all: number;
 };
 export type MenuItemAvgAggregateInputType = {
@@ -72,6 +73,7 @@ export type MenuItemCountAggregateInputType = {
     icon?: true;
     iconColor?: true;
     isFolder?: true;
+    params?: true;
     _all?: true;
 };
 export type MenuItemAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -157,6 +159,7 @@ export type MenuItemGroupByOutputType = {
     icon: string;
     iconColor: string;
     isFolder: boolean;
+    params: runtime.JsonValue | null;
     _count: MenuItemCountAggregateOutputType | null;
     _avg: MenuItemAvgAggregateOutputType | null;
     _sum: MenuItemSumAggregateOutputType | null;
@@ -176,6 +179,7 @@ export type MenuItemWhereInput = {
     icon?: Prisma.StringFilter<"MenuItem"> | string;
     iconColor?: Prisma.StringFilter<"MenuItem"> | string;
     isFolder?: Prisma.BoolFilter<"MenuItem"> | boolean;
+    params?: Prisma.JsonNullableFilter<"MenuItem">;
     placements?: Prisma.MenuItemPerMenuListRelationFilter;
 };
 export type MenuItemOrderByWithRelationInput = {
@@ -185,6 +189,7 @@ export type MenuItemOrderByWithRelationInput = {
     icon?: Prisma.SortOrder;
     iconColor?: Prisma.SortOrder;
     isFolder?: Prisma.SortOrder;
+    params?: Prisma.SortOrderInput | Prisma.SortOrder;
     placements?: Prisma.MenuItemPerMenuOrderByRelationAggregateInput;
 };
 export type MenuItemWhereUniqueInput = Prisma.AtLeast<{
@@ -197,6 +202,7 @@ export type MenuItemWhereUniqueInput = Prisma.AtLeast<{
     icon?: Prisma.StringFilter<"MenuItem"> | string;
     iconColor?: Prisma.StringFilter<"MenuItem"> | string;
     isFolder?: Prisma.BoolFilter<"MenuItem"> | boolean;
+    params?: Prisma.JsonNullableFilter<"MenuItem">;
     placements?: Prisma.MenuItemPerMenuListRelationFilter;
 }, "id" | "code">;
 export type MenuItemOrderByWithAggregationInput = {
@@ -206,6 +212,7 @@ export type MenuItemOrderByWithAggregationInput = {
     icon?: Prisma.SortOrder;
     iconColor?: Prisma.SortOrder;
     isFolder?: Prisma.SortOrder;
+    params?: Prisma.SortOrderInput | Prisma.SortOrder;
     _count?: Prisma.MenuItemCountOrderByAggregateInput;
     _avg?: Prisma.MenuItemAvgOrderByAggregateInput;
     _max?: Prisma.MenuItemMaxOrderByAggregateInput;
@@ -222,6 +229,7 @@ export type MenuItemScalarWhereWithAggregatesInput = {
     icon?: Prisma.StringWithAggregatesFilter<"MenuItem"> | string;
     iconColor?: Prisma.StringWithAggregatesFilter<"MenuItem"> | string;
     isFolder?: Prisma.BoolWithAggregatesFilter<"MenuItem"> | boolean;
+    params?: Prisma.JsonNullableWithAggregatesFilter<"MenuItem">;
 };
 export type MenuItemCreateInput = {
     code: string;
@@ -229,6 +237,7 @@ export type MenuItemCreateInput = {
     icon: string;
     iconColor: string;
     isFolder: boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     placements?: Prisma.MenuItemPerMenuCreateNestedManyWithoutMenuItemInput;
 };
 export type MenuItemUncheckedCreateInput = {
@@ -238,6 +247,7 @@ export type MenuItemUncheckedCreateInput = {
     icon: string;
     iconColor: string;
     isFolder: boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     placements?: Prisma.MenuItemPerMenuUncheckedCreateNestedManyWithoutMenuItemInput;
 };
 export type MenuItemUpdateInput = {
@@ -246,6 +256,7 @@ export type MenuItemUpdateInput = {
     icon?: Prisma.StringFieldUpdateOperationsInput | string;
     iconColor?: Prisma.StringFieldUpdateOperationsInput | string;
     isFolder?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     placements?: Prisma.MenuItemPerMenuUpdateManyWithoutMenuItemNestedInput;
 };
 export type MenuItemUncheckedUpdateInput = {
@@ -255,6 +266,7 @@ export type MenuItemUncheckedUpdateInput = {
     icon?: Prisma.StringFieldUpdateOperationsInput | string;
     iconColor?: Prisma.StringFieldUpdateOperationsInput | string;
     isFolder?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     placements?: Prisma.MenuItemPerMenuUncheckedUpdateManyWithoutMenuItemNestedInput;
 };
 export type MenuItemCreateManyInput = {
@@ -264,6 +276,7 @@ export type MenuItemCreateManyInput = {
     icon: string;
     iconColor: string;
     isFolder: boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type MenuItemUpdateManyMutationInput = {
     code?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -271,6 +284,7 @@ export type MenuItemUpdateManyMutationInput = {
     icon?: Prisma.StringFieldUpdateOperationsInput | string;
     iconColor?: Prisma.StringFieldUpdateOperationsInput | string;
     isFolder?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type MenuItemUncheckedUpdateManyInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -279,6 +293,7 @@ export type MenuItemUncheckedUpdateManyInput = {
     icon?: Prisma.StringFieldUpdateOperationsInput | string;
     iconColor?: Prisma.StringFieldUpdateOperationsInput | string;
     isFolder?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type MenuItemCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
@@ -287,6 +302,7 @@ export type MenuItemCountOrderByAggregateInput = {
     icon?: Prisma.SortOrder;
     iconColor?: Prisma.SortOrder;
     isFolder?: Prisma.SortOrder;
+    params?: Prisma.SortOrder;
 };
 export type MenuItemAvgOrderByAggregateInput = {
     id?: Prisma.SortOrder;
@@ -335,6 +351,7 @@ export type MenuItemCreateWithoutPlacementsInput = {
     icon: string;
     iconColor: string;
     isFolder: boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type MenuItemUncheckedCreateWithoutPlacementsInput = {
     id?: number;
@@ -343,6 +360,7 @@ export type MenuItemUncheckedCreateWithoutPlacementsInput = {
     icon: string;
     iconColor: string;
     isFolder: boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type MenuItemCreateOrConnectWithoutPlacementsInput = {
     where: Prisma.MenuItemWhereUniqueInput;
@@ -363,6 +381,7 @@ export type MenuItemUpdateWithoutPlacementsInput = {
     icon?: Prisma.StringFieldUpdateOperationsInput | string;
     iconColor?: Prisma.StringFieldUpdateOperationsInput | string;
     isFolder?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type MenuItemUncheckedUpdateWithoutPlacementsInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -371,6 +390,7 @@ export type MenuItemUncheckedUpdateWithoutPlacementsInput = {
     icon?: Prisma.StringFieldUpdateOperationsInput | string;
     iconColor?: Prisma.StringFieldUpdateOperationsInput | string;
     isFolder?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    params?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 /**
  * Count Type MenuItemCountOutputType
@@ -403,6 +423,7 @@ export type MenuItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
     icon?: boolean;
     iconColor?: boolean;
     isFolder?: boolean;
+    params?: boolean;
     placements?: boolean | Prisma.MenuItem$placementsArgs<ExtArgs>;
     _count?: boolean | Prisma.MenuItemCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["menuItem"]>;
@@ -413,6 +434,7 @@ export type MenuItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
     icon?: boolean;
     iconColor?: boolean;
     isFolder?: boolean;
+    params?: boolean;
 }, ExtArgs["result"]["menuItem"]>;
 export type MenuItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -421,6 +443,7 @@ export type MenuItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
     icon?: boolean;
     iconColor?: boolean;
     isFolder?: boolean;
+    params?: boolean;
 }, ExtArgs["result"]["menuItem"]>;
 export type MenuItemSelectScalar = {
     id?: boolean;
@@ -429,8 +452,9 @@ export type MenuItemSelectScalar = {
     icon?: boolean;
     iconColor?: boolean;
     isFolder?: boolean;
+    params?: boolean;
 };
-export type MenuItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "text" | "icon" | "iconColor" | "isFolder", ExtArgs["result"]["menuItem"]>;
+export type MenuItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "text" | "icon" | "iconColor" | "isFolder" | "params", ExtArgs["result"]["menuItem"]>;
 export type MenuItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     placements?: boolean | Prisma.MenuItem$placementsArgs<ExtArgs>;
     _count?: boolean | Prisma.MenuItemCountOutputTypeDefaultArgs<ExtArgs>;
@@ -449,6 +473,7 @@ export type $MenuItemPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
         icon: string;
         iconColor: string;
         isFolder: boolean;
+        params: runtime.JsonValue | null;
     }, ExtArgs["result"]["menuItem"]>;
     composites: {};
 };
@@ -810,6 +835,7 @@ export interface MenuItemFieldRefs {
     readonly icon: Prisma.FieldRef<"MenuItem", 'String'>;
     readonly iconColor: Prisma.FieldRef<"MenuItem", 'String'>;
     readonly isFolder: Prisma.FieldRef<"MenuItem", 'Boolean'>;
+    readonly params: Prisma.FieldRef<"MenuItem", 'Json'>;
 }
 /**
  * MenuItem findUnique
