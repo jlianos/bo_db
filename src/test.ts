@@ -21,6 +21,7 @@ export async function getMenuJson(code: string): Promise<MenuDataModel | null> {
 		where: { code },
 		include: {
 			items: {
+				orderBy: { order: "asc" },
 				include: {
 					menuItem: true,
 				},
@@ -74,6 +75,6 @@ export async function getMenuJson(code: string): Promise<MenuDataModel | null> {
 	};
 }
 
-const menuJson = await getMenuJson("admin");
+// const menuJson = await getMenuJson("admin");
 
-console.dir(menuJson, { depth: null });
+// console.dir(menuJson, { depth: null });

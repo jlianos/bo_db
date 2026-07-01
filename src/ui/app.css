@@ -1,0 +1,50 @@
+body {
+	margin: 0;
+	font-family: Arial, sans-serif;
+	background: #f3f4f6;
+}
+
+.app {
+	display: grid;
+	grid-template-columns: 280px 1fr 420px;
+	gap: 16px;
+	padding: 16px;
+}
+
+.panel {
+	background: white;
+	border-radius: 12px;
+	padding: 16px;
+	min-height: 80vh;
+}
+
+.item,
+.node {
+	padding: 10px;
+	margin: 6px 0;
+	background: #f8fafc;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	cursor: grab;
+}
+
+.node {
+	background: #eef2ff;
+}
+
+.children {
+	margin-left: 24px;
+	padding-left: 12px;
+	border-left: 2px solid #c7d2fe;
+}
+
+.drop-zone {
+	min-height: 80px;
+	padding: 8px;
+	border: 2px dashed #cbd5e1;
+	border-radius: 8px;
+}
+
+.drop-hover {
+	background: #ecfdf5;
+}
