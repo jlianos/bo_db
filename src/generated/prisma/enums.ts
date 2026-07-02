@@ -9,7 +9,9 @@
 * 🟢 You can import this file directly.
 */
 
+export const MenuItemKind = {
+  FOLDER: 'FOLDER',
+  ITEM: 'ITEM'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type MenuItemKind = (typeof MenuItemKind)[keyof typeof MenuItemKind]

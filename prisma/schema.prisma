@@ -19,14 +19,19 @@ model Menu {
   items MenuItemPerMenu[]
 }
 
+enum MenuItemKind {
+  FOLDER
+  ITEM
+}
+
 model MenuItem {
   id Int @id @default(autoincrement())
 
-  code      String  @unique
+  code      String       @unique
   text      String
   icon      String
   iconColor String
-  isFolder  Boolean
+  kind      MenuItemKind @default(ITEM)
 
   params Json?
 
@@ -40,7 +45,7 @@ model MenuItemPerMenu {
   menu   Menu @relation(fields: [menuId], references: [id])
 
   menuItemId Int
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
   parentId Int?
   parent   MenuItemPerMenu?  @relation("MenuPlacementTree", fields: [parentId], references: [id], onDelete: Cascade)

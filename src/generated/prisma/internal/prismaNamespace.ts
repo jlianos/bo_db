@@ -680,7 +680,7 @@ export const MenuItemScalarFieldEnum = {
   text: 'text',
   icon: 'icon',
   iconColor: 'iconColor',
-  isFolder: 'isFolder',
+  kind: 'kind',
   params: 'params'
 } as const
 
@@ -760,9 +760,9 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
 
 
 /**
- * Reference to a field of type 'Boolean'
+ * Reference to a field of type 'MenuItemKind'
  */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+export type EnumMenuItemKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MenuItemKind'>
     
 
 

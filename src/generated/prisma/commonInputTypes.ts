@@ -108,9 +108,11 @@ export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
 }
 
-export type BoolFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
+export type EnumMenuItemKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.MenuItemKind | Prisma.EnumMenuItemKindFieldRefInput<$PrismaModel>
+  in?: $Enums.MenuItemKind[]
+  notIn?: $Enums.MenuItemKind[]
+  not?: Prisma.NestedEnumMenuItemKindFilter<$PrismaModel> | $Enums.MenuItemKind
 }
 
 export type JsonNullableFilter<$PrismaModel = never> =
@@ -132,12 +134,14 @@ export type JsonNullableFilterBase<$PrismaModel = never> = {
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
-export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+export type EnumMenuItemKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MenuItemKind | Prisma.EnumMenuItemKindFieldRefInput<$PrismaModel>
+  in?: $Enums.MenuItemKind[]
+  notIn?: $Enums.MenuItemKind[]
+  not?: Prisma.NestedEnumMenuItemKindWithAggregatesFilter<$PrismaModel> | $Enums.MenuItemKind
   _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedBoolFilter<$PrismaModel>
-  _max?: Prisma.NestedBoolFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMenuItemKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMenuItemKindFilter<$PrismaModel>
 }
 
 export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
@@ -300,17 +304,21 @@ export type NestedIntNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedIntNullableFilter<$PrismaModel> | number | null
 }
 
-export type NestedBoolFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
+export type NestedEnumMenuItemKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.MenuItemKind | Prisma.EnumMenuItemKindFieldRefInput<$PrismaModel>
+  in?: $Enums.MenuItemKind[]
+  notIn?: $Enums.MenuItemKind[]
+  not?: Prisma.NestedEnumMenuItemKindFilter<$PrismaModel> | $Enums.MenuItemKind
 }
 
-export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+export type NestedEnumMenuItemKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MenuItemKind | Prisma.EnumMenuItemKindFieldRefInput<$PrismaModel>
+  in?: $Enums.MenuItemKind[]
+  notIn?: $Enums.MenuItemKind[]
+  not?: Prisma.NestedEnumMenuItemKindWithAggregatesFilter<$PrismaModel> | $Enums.MenuItemKind
   _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedBoolFilter<$PrismaModel>
-  _max?: Prisma.NestedBoolFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMenuItemKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMenuItemKindFilter<$PrismaModel>
 }
 
 export type NestedJsonNullableFilter<$PrismaModel = never> =

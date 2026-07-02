@@ -1,3 +1,4 @@
+import { MenuItemKind } from "./generated/prisma/browser.js";
 import { prisma } from "./prisma.js";
 
 async function main() {
@@ -13,8 +14,8 @@ async function main() {
 		createItem("sales", "Sales", "chart-line", "#ef4444"),
 		createItem("purchases", "Purchases", "shopping-cart", "#06b6d4"),
 		createItem("inventory", "Inventory", "warehouse", "#6366f1"),
-		createItem("reports", "Reports", "chart-bar", "#84cc16", true),
-		createItem("settings", "Settings", "cog", "#6b7280", true),
+		createItem("reports", "Reports", "chart-bar", "#84cc16", MenuItemKind.FOLDER),
+		createItem("settings", "Settings", "cog", "#6b7280", MenuItemKind.FOLDER),
 		createItem("users", "Users", "user", "#ec4899"),
 		createItem("roles", "Roles", "shield", "#14b8a6"),
 		createItem("audit", "Audit Log", "history", "#f97316"),
@@ -213,14 +214,20 @@ async function main() {
 	console.log("Seed completed");
 }
 
-function createItem(code: string, text: string, icon: string, iconColor: string, isFolder = false) {
+function createItem(
+	code: string,
+	text: string,
+	icon: string,
+	iconColor: string,
+	kind: MenuItemKind = MenuItemKind.ITEM,
+) {
 	return prisma.menuItem.create({
 		data: {
 			code,
 			text,
 			icon,
 			iconColor,
-			isFolder,
+			kind,
 		},
 	});
 }

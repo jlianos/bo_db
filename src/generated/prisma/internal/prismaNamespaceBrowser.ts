@@ -85,7 +85,7 @@ export const MenuItemScalarFieldEnum = {
   text: 'text',
   icon: 'icon',
   iconColor: 'iconColor',
-  isFolder: 'isFolder',
+  kind: 'kind',
   params: 'params'
 } as const
 

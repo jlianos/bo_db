@@ -13,7 +13,7 @@ CREATE TABLE "MenuItem" (
     "text" TEXT NOT NULL,
     "icon" TEXT NOT NULL,
     "iconColor" TEXT NOT NULL,
-    "isFolder" BOOLEAN NOT NULL,
+    "kind" TEXT NOT NULL DEFAULT 'ITEM',
     "params" JSONB
 );
 
@@ -24,9 +24,9 @@ CREATE TABLE "MenuItemPerMenu" (
     "menuItemId" INTEGER NOT NULL,
     "parentId" INTEGER,
     "order" INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT "MenuItemPerMenu_menuId_fkey" FOREIGN KEY ("menuId") REFERENCES "Menu" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "MenuItemPerMenu_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "MenuItem" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "MenuItemPerMenu_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "MenuItemPerMenu" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "MenuItemPerMenu_menuId_fkey" FOREIGN KEY ("menuId") REFERENCES "Menu" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "MenuItemPerMenu_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "MenuItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "MenuItemPerMenu_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "MenuItemPerMenu" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex
