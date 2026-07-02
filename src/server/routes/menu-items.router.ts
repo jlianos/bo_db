@@ -63,9 +63,6 @@ menuItemsRouter.patch("/:itemId", async (req, res) => {
 });
 
 function parseMenuItemParams(params: unknown) {
-	console.dir(params, { depth: null });
-	console.dir(typeof params);
-	
 	if (params === null) {
 		return { success: true as const, value: Prisma.DbNull };
 	}
