@@ -39,23 +39,72 @@
                         <p id="selectedMenuMeta" class="eyebrow">No menu selected</p>
                         <h2 id="selectedMenuTitle">Structure</h2>
                     </div>
-                    <button id="refreshButton" type="button" class="icon-button" aria-label="Refresh preview"
-                        title="Refresh preview">
-                        ↻
-                    </button>
+                    <span id="placementCount" class="count">0</span>
                 </div>
                 <div id="menuTree" class="tree drop-zone"></div>
             </section>
 
-            <section class="panel inspector-panel">
+            <section class="panel editor-panel">
                 <div class="panel-header">
                     <div>
-                        <p class="eyebrow">Output</p>
-                        <h2>JSON Preview</h2>
+                        <p class="eyebrow">Definitions</p>
+                        <h2>Item Editor</h2>
                     </div>
-                    <span id="placementCount" class="count">0</span>
                 </div>
-                <pre id="preview"></pre>
+
+                <div class="mode-toggle" role="group" aria-label="Item editor mode">
+                    <button id="createItemMode" type="button" class="mode-button is-active">Create</button>
+                    <button id="editItemMode" type="button" class="mode-button">Edit Existing</button>
+                </div>
+
+                <form id="itemForm" class="item-form">
+                    <label id="existingItemField" class="field is-hidden">
+                        <span>Existing item</span>
+                        <select id="existingItemSelect"></select>
+                    </label>
+
+                    <div class="field-grid">
+                        <label class="field">
+                            <span>Code</span>
+                            <input id="itemCode" name="code" type="text" autocomplete="off" required>
+                        </label>
+
+                        <label class="field">
+                            <span>Kind</span>
+                            <select id="itemKind" name="kind" required>
+                                <option value="ITEM">Item</option>
+                                <option value="FOLDER">Folder</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label class="field">
+                        <span>Text</span>
+                        <input id="itemText" name="text" type="text" autocomplete="off" required>
+                    </label>
+
+                    <div class="field-grid">
+                        <label class="field">
+                            <span>Icon</span>
+                            <input id="itemIcon" name="icon" type="text" autocomplete="off" required>
+                        </label>
+
+                        <label class="field">
+                            <span>Icon color</span>
+                            <input id="itemIconColor" name="iconColor" type="color" value="#64748b" required>
+                        </label>
+                    </div>
+
+                    <label class="field">
+                        <span>Params JSON</span>
+                        <textarea id="itemParams" name="params" rows="8" spellcheck="false"></textarea>
+                    </label>
+
+                    <div class="form-actions">
+                        <button id="resetItemForm" type="button" class="secondary-button">Reset</button>
+                        <button id="saveItemButton" type="submit" class="primary-button">Create item</button>
+                    </div>
+                </form>
             </section>
         </main>
 

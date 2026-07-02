@@ -126,7 +126,7 @@ select {
 }
 
 .builder-panel,
-.inspector-panel {
+.editor-panel {
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
@@ -393,19 +393,6 @@ select {
 	border-radius: 8px;
 }
 
-pre {
-	overflow: auto;
-	flex: 1;
-	min-height: 0;
-	margin: 0;
-	padding: 14px;
-	color: #d8e2f2;
-	font-size: 12px;
-	line-height: 1.55;
-	background: #101828;
-	border-radius: 8px;
-}
-
 .status {
 	position: fixed;
 	right: 18px;
@@ -435,6 +422,123 @@ pre {
 	cursor: progress;
 }
 
+.mode-toggle {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 6px;
+	margin-bottom: 12px;
+	padding: 4px;
+	background: var(--panel-soft);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+}
+
+.mode-button {
+	min-height: 34px;
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 800;
+	background: transparent;
+	border: 0;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.mode-button.is-active {
+	color: var(--accent);
+	background: #ffffff;
+	box-shadow: 0 1px 6px rgba(15, 23, 42, 0.08);
+}
+
+.item-form {
+	display: grid;
+	gap: 12px;
+	overflow: auto;
+	min-height: 0;
+}
+
+.field-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+	gap: 10px;
+}
+
+.field {
+	display: grid;
+	gap: 6px;
+}
+
+.field span {
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.field input,
+.field select,
+.field textarea {
+	width: 100%;
+	min-height: 40px;
+	padding: 9px 10px;
+	color: var(--text);
+	font: inherit;
+	font-size: 14px;
+	background: var(--panel-soft);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+}
+
+.field textarea {
+	min-height: 140px;
+	resize: vertical;
+	font-family: "Cascadia Code", Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.field input[type="color"] {
+	padding: 4px;
+}
+
+.is-hidden {
+	display: none;
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	padding-top: 4px;
+}
+
+.primary-button,
+.secondary-button {
+	min-height: 38px;
+	padding: 0 14px;
+	font-size: 13px;
+	font-weight: 800;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.primary-button {
+	color: #ffffff;
+	background: var(--accent);
+	border: 1px solid var(--accent);
+}
+
+.secondary-button {
+	color: var(--text);
+	background: #ffffff;
+	border: 1px solid var(--border);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
 @media (max-width: 1100px) {
 	.app {
 		grid-template-columns: 1fr;
@@ -458,6 +562,10 @@ pre {
 	.children {
 		margin-left: 12px;
 		padding-left: 10px;
+	}
+
+	.field-grid {
+		grid-template-columns: 1fr;
 	}
 
 	.library-item,

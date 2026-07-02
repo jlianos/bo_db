@@ -60,6 +60,25 @@ app.post("/api/menu-items", async (req, res) => {
 	res.json(item);
 });
 
+app.patch("/api/menu-items/:itemId", async (req, res) => {
+	const id = Number(req.params.itemId);
+	const { code, text, icon, iconColor, kind, params } = req.body;
+
+	const item = await prisma.menuItem.update({
+		where: { id },
+		data: {
+			code,
+			text,
+			icon,
+			iconColor,
+			kind,
+			params: params ?? null,
+		},
+	});
+
+	res.json(item);
+});
+
 app.post("/api/menus/:menuId/items", async (req, res) => {
 	const menuId = Number(req.params.menuId);
 	const { menuItemId, parentId, order } = req.body;

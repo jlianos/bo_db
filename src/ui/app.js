@@ -3,17 +3,31 @@ const state = {
 	items: [],
 	placements: [],
 	dragged: null,
+	itemEditorMode: "create",
+	pendingEditorItemId: null,
 	isLoading: false,
+	toastTimer: null,
 };
 
 const elements = {
 	availableItems: document.getElementById("availableItems"),
+	createItemMode: document.getElementById("createItemMode"),
+	editItemMode: document.getElementById("editItemMode"),
+	existingItemField: document.getElementById("existingItemField"),
+	existingItemSelect: document.getElementById("existingItemSelect"),
 	itemCount: document.getElementById("itemCount"),
+	itemCode: document.getElementById("itemCode"),
+	itemForm: document.getElementById("itemForm"),
+	itemIcon: document.getElementById("itemIcon"),
+	itemIconColor: document.getElementById("itemIconColor"),
+	itemKind: document.getElementById("itemKind"),
+	itemParams: document.getElementById("itemParams"),
+	itemText: document.getElementById("itemText"),
 	menuSelect: document.getElementById("menuSelect"),
 	menuTree: document.getElementById("menuTree"),
 	placementCount: document.getElementById("placementCount"),
-	preview: document.getElementById("preview"),
-	refreshButton: document.getElementById("refreshButton"),
+	resetItemForm: document.getElementById("resetItemForm"),
+	saveItemButton: document.getElementById("saveItemButton"),
 	selectedMenuMeta: document.getElementById("selectedMenuMeta"),
 	selectedMenuTitle: document.getElementById("selectedMenuTitle"),
 	statusMessage: document.getElementById("statusMessage"),
@@ -47,6 +61,7 @@ async function load() {
 
 		renderMenus();
 		renderAvailableItems();
+		renderItemEditor();
 		await loadPlacements();
 		showStatus("");
 	} catch (error) {
@@ -63,7 +78,6 @@ async function loadPlacements() {
 		state.placements = [];
 		renderMenuContext();
 		renderTree();
-		renderPreview(null);
 		return;
 	}
 
@@ -73,7 +87,6 @@ async function loadPlacements() {
 		state.placements = await api(`/api/menus/${menu.id}/placements`);
 		renderMenuContext();
 		renderTree();
-		await refreshPreview();
 		showStatus("");
 	} catch (error) {
 		showError(error);
@@ -164,6 +177,156 @@ function renderLibraryItem(item) {
 	});
 
 	return el;
+}
+
+function renderItemEditor() {
+	const isEdit = state.itemEditorMode === "edit";
+
+	elements.createItemMode.classList.toggle("is-active", !isEdit);
+	elements.editItemMode.classList.toggle("is-active", isEdit);
+	elements.existingItemField.classList.toggle("is-hidden", !isEdit);
+	elements.saveItemButton.textContent = isEdit ? "Save changes" : "Create item";
+
+	renderExistingItemOptions();
+
+	if (isEdit) {
+		fillItemForm(getSelectedEditorItem());
+		return;
+	}
+
+	clearItemForm();
+}
+
+function renderExistingItemOptions() {
+	const selectedId = state.pendingEditorItemId ?? Number(elements.existingItemSelect.value);
+
+	elements.existingItemSelect.innerHTML = "";
+
+	for (const item of [...state.items].sort(sortByText)) {
+		const option = document.createElement("option");
+		option.value = String(item.id);
+		option.textContent = `${item.text} (${item.kind})`;
+		elements.existingItemSelect.appendChild(option);
+	}
+
+	if (state.items.some((item) => item.id === selectedId)) {
+		elements.existingItemSelect.value = String(selectedId);
+	}
+
+	state.pendingEditorItemId = null;
+}
+
+function setItemEditorMode(mode) {
+	state.itemEditorMode = mode;
+	renderItemEditor();
+}
+
+function fillItemForm(item) {
+	if (!item) {
+		clearItemForm();
+		return;
+	}
+
+	elements.itemCode.value = item.code ?? "";
+	elements.itemText.value = item.text ?? "";
+	elements.itemIcon.value = item.icon ?? "";
+	elements.itemIconColor.value = escapeColor(item.iconColor);
+	elements.itemKind.value = item.kind ?? "ITEM";
+	elements.itemParams.value = item.params ? JSON.stringify(item.params, null, 2) : "";
+}
+
+function clearItemForm() {
+	elements.itemForm.reset();
+	elements.itemIconColor.value = "#64748b";
+	elements.itemKind.value = "ITEM";
+	elements.itemParams.value = "";
+}
+
+async function saveItemDefinition(event) {
+	event.preventDefault();
+
+	const isEdit = state.itemEditorMode === "edit";
+	const existingItem = getSelectedEditorItem();
+
+	if (isEdit && !existingItem) {
+		showError(new Error("Select an existing item first."));
+		return;
+	}
+
+	let params = null;
+
+	try {
+		params = parseParamsJson(elements.itemParams.value);
+	} catch (error) {
+		showError(error);
+		return;
+	}
+
+	const payload = {
+		code: elements.itemCode.value.trim(),
+		text: elements.itemText.value.trim(),
+		icon: elements.itemIcon.value.trim(),
+		iconColor: elements.itemIconColor.value,
+		kind: elements.itemKind.value,
+		params,
+	};
+
+	if (!payload.code || !payload.text || !payload.icon || !payload.iconColor) {
+		showError(new Error("Code, text, icon, and icon color are required."));
+		return;
+	}
+
+	setLoading(true);
+
+	try {
+		if (isEdit) {
+			await api(`/api/menu-items/${existingItem.id}`, {
+				method: "PATCH",
+				body: JSON.stringify(payload),
+			});
+			showStatus("Item updated.");
+		} else {
+			const item = await api("/api/menu-items", {
+				method: "POST",
+				body: JSON.stringify(payload),
+			});
+			state.itemEditorMode = "edit";
+			state.pendingEditorItemId = item.id;
+			showStatus("Item created.");
+		}
+
+		await refreshItems();
+		await loadPlacements();
+	} catch (error) {
+		showError(error);
+	} finally {
+		setLoading(false);
+	}
+}
+
+async function refreshItems() {
+	state.items = await api("/api/menu-items");
+	renderAvailableItems();
+	renderItemEditor();
+}
+
+function parseParamsJson(value) {
+	const text = value.trim();
+
+	if (!text) {
+		return null;
+	}
+
+	try {
+		return JSON.parse(text);
+	} catch {
+		throw new Error("Params JSON is not valid.");
+	}
+}
+
+function getSelectedEditorItem() {
+	const id = Number(elements.existingItemSelect.value);
+	return state.items.find((item) => item.id === id) ?? null;
 }
 
 function renderMenuContext() {
@@ -408,12 +571,13 @@ function createDropZone(parentId, label) {
 
 async function moveDraggedItem(parentId) {
 	const menu = getSelectedMenu();
+	const dragged = state.dragged;
 
-	if (!menu || !state.dragged) {
+	if (!menu || !dragged) {
 		return;
 	}
 
-	if (!canPlaceUnder(parentId, state.dragged)) {
+	if (!canPlaceUnder(parentId, dragged)) {
 		showError(new Error("Items can only be placed at the root or under folders."));
 		state.dragged = null;
 		return;
@@ -423,19 +587,19 @@ async function moveDraggedItem(parentId) {
 	setLoading(true);
 
 	try {
-		if (state.dragged.type === "new-item") {
+		if (dragged.type === "new-item") {
 			await api(`/api/menus/${menu.id}/items`, {
 				method: "POST",
 				body: JSON.stringify({
-					menuItemId: state.dragged.menuItemId,
+					menuItemId: dragged.menuItemId,
 					parentId,
 					order: nextOrder,
 				}),
 			});
 		}
 
-		if (state.dragged.type === "existing-placement") {
-			await api(`/api/placements/${state.dragged.placementId}`, {
+		if (dragged.type === "existing-placement") {
+			await api(`/api/placements/${dragged.placementId}`, {
 				method: "PATCH",
 				body: JSON.stringify({
 					parentId,
@@ -489,26 +653,6 @@ function isDescendantPlacement(candidateParentId, placementId) {
 	return false;
 }
 
-async function refreshPreview() {
-	const menu = getSelectedMenu();
-
-	if (!menu) {
-		renderPreview(null);
-		return;
-	}
-
-	try {
-		const json = await api(`/api/menus/${menu.code}/json`);
-		renderPreview(json);
-	} catch (error) {
-		showError(error);
-	}
-}
-
-function renderPreview(json) {
-	elements.preview.textContent = json ? JSON.stringify(json, null, 2) : "{}";
-}
-
 function getSelectedMenu() {
 	const id = Number(elements.menuSelect.value);
 	return state.menus.find((menu) => menu.id === id) ?? null;
@@ -531,6 +675,10 @@ function sortByOrder(a, b) {
 	return (a.order ?? 0) - (b.order ?? 0) || a.id - b.id;
 }
 
+function sortByText(a, b) {
+	return a.text.localeCompare(b.text) || a.id - b.id;
+}
+
 function createEmptyState(message) {
 	const empty = document.createElement("div");
 	empty.className = "empty-state";
@@ -541,20 +689,45 @@ function createEmptyState(message) {
 function setLoading(isLoading) {
 	state.isLoading = isLoading;
 	document.body.classList.toggle("is-loading", isLoading);
-	elements.refreshButton.disabled = isLoading;
 	elements.menuSelect.disabled = isLoading;
+	elements.saveItemButton.disabled = isLoading;
+	elements.resetItemForm.disabled = isLoading;
 }
 
 function showStatus(message) {
+	clearToastTimer();
 	elements.statusMessage.textContent = message;
 	elements.statusMessage.classList.toggle("is-visible", Boolean(message));
 	elements.statusMessage.classList.remove("is-error");
+
+	if (message) {
+		scheduleToastDismiss();
+	}
 }
 
 function showError(error) {
+	clearToastTimer();
 	const message = error instanceof Error ? error.message : "Unexpected error";
 	elements.statusMessage.textContent = message;
 	elements.statusMessage.classList.add("is-visible", "is-error");
+	scheduleToastDismiss();
+}
+
+function scheduleToastDismiss() {
+	state.toastTimer = window.setTimeout(() => {
+		elements.statusMessage.classList.remove("is-visible", "is-error");
+		elements.statusMessage.textContent = "";
+		state.toastTimer = null;
+	}, 3200);
+}
+
+function clearToastTimer() {
+	if (!state.toastTimer) {
+		return;
+	}
+
+	window.clearTimeout(state.toastTimer);
+	state.toastTimer = null;
 }
 
 function escapeHtml(value) {
@@ -576,6 +749,17 @@ function escapeColor(value) {
 }
 
 elements.menuSelect.addEventListener("change", loadPlacements);
-elements.refreshButton.addEventListener("click", refreshPreview);
+elements.createItemMode.addEventListener("click", () => setItemEditorMode("create"));
+elements.editItemMode.addEventListener("click", () => setItemEditorMode("edit"));
+elements.existingItemSelect.addEventListener("change", () => fillItemForm(getSelectedEditorItem()));
+elements.itemForm.addEventListener("submit", saveItemDefinition);
+elements.resetItemForm.addEventListener("click", () => {
+	if (state.itemEditorMode === "edit") {
+		fillItemForm(getSelectedEditorItem());
+		return;
+	}
+
+	clearItemForm();
+});
 
 load();
