@@ -1,4 +1,5 @@
 import type { MenuItemKind } from "../generated/prisma/browser.js";
+import type { MenuItemParams } from "./menu-item-params.models.js";
 
 export type MenuDataModel = {
 	mainHeaderText: string;
@@ -13,5 +14,6 @@ export type MenuItemModel = {
 	iconColor: string;
 	kind: MenuItemKind;
 	order: number;
+	params: MenuItemParams | null;
 	items: MenuItemModel[];
 };

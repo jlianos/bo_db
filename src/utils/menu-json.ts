@@ -28,6 +28,7 @@ export async function getMenuJson(code: string): Promise<MenuDataModel | null> {
 			iconColor: placement.menuItem.iconColor,
 			kind: placement.menuItem.kind,
 			order: placement.order,
+			params: placement.menuItem.params,
 			items: [],
 		});
 	}
