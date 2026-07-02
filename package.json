@@ -4,11 +4,11 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "tsc && cpx \"src/ui/**/*\" dist/ui",
-		"start": "node dist/server.js",
+		"build": "rimraf dist && tsc && cpx \"src/ui/**/*\" dist/ui",
+		"start": "node dist/server/server.js",
 		"dev": "tsx src/server/server.ts",
 		"seed": "tsx src/utils/seed.ts",
-		"reset": "rimraf prisma/migrations && prisma migrate reset -f && prisma migrate dev --name init && prisma generate && npm run seed"
+		"reset": "rimraf prisma/migrations && prisma migrate reset -f && prisma migrate dev --name init && prisma generate && npm run seed && npm run build"
 	},
 	"keywords": [],
 	"author": "",
