@@ -1,8 +1,8 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import { getMenuJson } from "./menu-json.js";
 import { prisma } from "./prisma.js";
-import { getMenuJson } from "./test.js";
 
 const app = express();
 
@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, "ui")));
 
-app.get("/api/menus", async (req, res) => {
+app.get("/api/menus", async (_req, res) => {
 	const menus = await prisma.menu.findMany({
 		orderBy: { id: "desc" },
 	});
@@ -35,7 +35,7 @@ app.post("/api/menus", async (req, res) => {
 	res.json(menu);
 });
 
-app.get("/api/menu-items", async (req, res) => {
+app.get("/api/menu-items", async (_req, res) => {
 	const items = await prisma.menuItem.findMany({
 		orderBy: { id: "desc" },
 	});
@@ -44,7 +44,7 @@ app.get("/api/menu-items", async (req, res) => {
 });
 
 app.post("/api/menu-items", async (req, res) => {
-	const { code, text, icon, iconColor, isFolder, params } = req.body;
+	const { code, text, icon, iconColor, kind, params } = req.body;
 
 	const item = await prisma.menuItem.create({
 		data: {
@@ -52,7 +52,7 @@ app.post("/api/menu-items", async (req, res) => {
 			text,
 			icon,
 			iconColor,
-			isFolder: Boolean(isFolder),
+			kind,
 			params: params ?? null,
 		},
 	});

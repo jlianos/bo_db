@@ -1,20 +1,5 @@
+import type { MenuDataModel, MenuItemModel } from "./models/menu.model.js";
 import { prisma } from "./prisma.js";
-
-export type MenuDataModel = {
-	mainHeaderText: string;
-	subHeaderText: string;
-	menuItems: MenuItemModel[];
-};
-
-export type MenuItemModel = {
-	id: string;
-	text: string;
-	icon: string;
-	iconColor: string;
-	isFolder: boolean;
-	order: number;
-	items: MenuItemModel[];
-};
 
 export async function getMenuJson(code: string): Promise<MenuDataModel | null> {
 	const menu = await prisma.menu.findUnique({
@@ -41,7 +26,7 @@ export async function getMenuJson(code: string): Promise<MenuDataModel | null> {
 			text: placement.menuItem.text,
 			icon: placement.menuItem.icon,
 			iconColor: placement.menuItem.iconColor,
-			isFolder: placement.menuItem.isFolder,
+			kind: placement.menuItem.kind,
 			order: placement.order,
 			items: [],
 		});
@@ -74,7 +59,3 @@ export async function getMenuJson(code: string): Promise<MenuDataModel | null> {
 		menuItems: roots,
 	};
 }
-
-// const menuJson = await getMenuJson("admin");
-
-// console.dir(menuJson, { depth: null });

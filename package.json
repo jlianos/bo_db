@@ -5,8 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "tsc",
-		"start": "node dist/test.js",
-		"dev": "tsx src/test.ts",
+		"start": "node dist/server.js",
+		"dev": "tsx src/server.ts",
 		"seed": "tsx src/seed.ts",
 		"reset": "rimraf prisma/migrations && prisma migrate reset -f && prisma migrate dev --name init && prisma generate && npm run seed"
 	},
