@@ -2,30 +2,64 @@
 <html lang="en">
 
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Menu Builder</title>
     <link rel="stylesheet" href="./app.css">
 </head>
 
 <body>
     <div class="app">
-        <aside class="panel">
-            <h2>Menus</h2>
-            <select id="menuSelect"></select>
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Menu configuration</p>
+                <h1>Menu Builder</h1>
+            </div>
+            <div class="menu-picker">
+                <label for="menuSelect">Current menu</label>
+                <select id="menuSelect"></select>
+            </div>
+        </header>
 
-            <h2>Available Items</h2>
-            <div id="availableItems" class="list"></div>
+        <aside class="sidebar panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Library</p>
+                    <h2>Available Items</h2>
+                </div>
+                <span id="itemCount" class="count">0</span>
+            </div>
+            <div id="availableItems" class="item-list"></div>
         </aside>
 
-        <main class="panel">
-            <h2>Menu Builder</h2>
-            <div id="menuTree" class="tree drop-zone"></div>
+        <main class="workspace">
+            <section class="panel builder-panel">
+                <div class="panel-header">
+                    <div>
+                        <p id="selectedMenuMeta" class="eyebrow">No menu selected</p>
+                        <h2 id="selectedMenuTitle">Structure</h2>
+                    </div>
+                    <button id="refreshButton" type="button" class="icon-button" aria-label="Refresh preview"
+                        title="Refresh preview">
+                        ↻
+                    </button>
+                </div>
+                <div id="menuTree" class="tree drop-zone"></div>
+            </section>
+
+            <section class="panel inspector-panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Output</p>
+                        <h2>JSON Preview</h2>
+                    </div>
+                    <span id="placementCount" class="count">0</span>
+                </div>
+                <pre id="preview"></pre>
+            </section>
         </main>
 
-        <aside class="panel">
-            <h2>Preview</h2>
-            <button type="button" onclick="refreshPreview()">Refresh</button>
-            <pre id="preview"></pre>
-        </aside>
+        <div id="statusMessage" class="status" role="status"></div>
     </div>
 
     <script src="./app.js"></script>
