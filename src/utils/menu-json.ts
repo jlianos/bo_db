@@ -1,4 +1,4 @@
-import type { MenuDataModel, MenuItemModel } from "./models/menu.model.js";
+import type { MenuDataModel, MenuItemModel } from "../models/menu.model.js";
 import { prisma } from "./prisma.js";
 
 export async function getMenuJson(code: string): Promise<MenuDataModel | null> {

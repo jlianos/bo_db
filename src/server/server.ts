@@ -1,8 +1,8 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
-import { getMenuJson } from "./menu-json.js";
-import { prisma } from "./prisma.js";
+import { getMenuJson } from "../utils/menu-json.js";
+import { prisma } from "../utils/prisma.js";
 
 const app = express();
 

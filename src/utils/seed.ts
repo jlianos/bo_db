@@ -1,4 +1,4 @@
-import { MenuItemKind } from "./generated/prisma/browser.js";
+import { MenuItemKind } from "../generated/prisma/browser.js";
 import { prisma } from "./prisma.js";
 
 async function main() {
