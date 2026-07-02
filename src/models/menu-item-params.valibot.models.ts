@@ -25,7 +25,7 @@ const OperatorSchema = v.picklist([
 	"css",
 ]);
 
-const HandlerKindSchema = v.picklist(["query", "function"]);
+const HandlerKindSchema = v.picklist(["query", "function-query", "function-data"]);
 
 const HandlerSchema = v.object({
 	kind: v.optional(HandlerKindSchema, "query"),
@@ -116,12 +116,17 @@ const MenuItemParamsChildSchema = v.object({
 
 	handlers: v.optional(
 		v.object({
-			select: v.optional(v.string(), ""),
-			insert: v.optional(v.string(), ""),
-			update: v.optional(v.string(), ""),
-			delete: v.optional(v.string(), ""),
+			select: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			insert: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			update: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			delete: v.optional(HandlerSchema, { kind: "query", src: "" }),
 		}),
-		{ select: "", insert: "", update: "", delete: "" },
+		{
+			select: { kind: "query", src: "" },
+			insert: { kind: "query", src: "" },
+			update: { kind: "query", src: "" },
+			delete: { kind: "query", src: "" },
+		},
 	),
 
 	permissions: v.optional(
@@ -141,12 +146,17 @@ const MenuItemParamsSchema = v.object({
 
 	handlers: v.optional(
 		v.object({
-			select: v.optional(v.string(), ""),
-			insert: v.optional(v.string(), ""),
-			update: v.optional(v.string(), ""),
-			delete: v.optional(v.string(), ""),
+			select: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			insert: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			update: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			delete: v.optional(HandlerSchema, { kind: "query", src: "" }),
 		}),
-		{ select: "", insert: "", update: "", delete: "" },
+		{
+			select: { kind: "query", src: "" },
+			insert: { kind: "query", src: "" },
+			update: { kind: "query", src: "" },
+			delete: { kind: "query", src: "" },
+		},
 	),
 
 	permissions: v.optional(

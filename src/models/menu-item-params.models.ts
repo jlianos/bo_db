@@ -22,6 +22,13 @@ type Operator =
 	| "json"
 	| "css";
 
+type HandlerKind = "query" | "function-query" | "function-data";
+
+type Handler = {
+	kind: HandlerKind;
+	src: string;
+};
+
 type ColumnParams = {
 	name: string;
 	label: string;
@@ -55,7 +62,7 @@ type ColumnParams = {
 
 	lookup: {
 		enabled: boolean;
-		handler: string;
+		handler: Handler;
 	};
 };
 
@@ -71,7 +78,7 @@ type RelationParams = {
 
 type MenuItemParamsChild = {
 	relation: RelationParams;
-	params: MenuItemParams;
+	params: Omit<MenuItemParams, "children">;
 };
 
 export type MenuItemParams = {
@@ -80,10 +87,10 @@ export type MenuItemParams = {
 	columns: ColumnParams[];
 
 	handlers: {
-		select: string;
-		insert: string;
-		update: string;
-		delete: string;
+		select: Handler;
+		insert: Handler;
+		update: Handler;
+		delete: Handler;
 	};
 
 	permissions: {
