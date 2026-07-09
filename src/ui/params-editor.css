@@ -1,0 +1,256 @@
+.params-field {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 8px;
+}
+
+.params-summary {
+	justify-content: flex-start;
+	min-width: 0;
+	text-align: left;
+}
+
+.params-summary span {
+	overflow: hidden;
+	min-width: 0;
+	color: inherit;
+	font-size: 13px;
+	font-weight: 800;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.has-params-modal {
+	overflow: hidden;
+}
+
+.params-modal[hidden] {
+	display: none;
+}
+
+.params-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 40;
+	display: grid;
+	place-items: center;
+	padding: 18px;
+}
+
+.params-modal-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.46);
+}
+
+.params-dialog {
+	position: relative;
+	display: grid;
+	grid-template-rows: auto auto minmax(0, 1fr) auto;
+	width: min(1120px, 100%);
+	max-height: min(860px, calc(100vh - 36px));
+	overflow: hidden;
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+}
+
+.params-dialog-header,
+.params-dialog-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--border);
+}
+
+.params-dialog-footer {
+	justify-content: flex-end;
+	border-top: 1px solid var(--border);
+	border-bottom: 0;
+}
+
+.params-close-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	color: var(--muted);
+	font-size: 16px;
+	font-weight: 900;
+	background: var(--panel-soft);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.params-tabs {
+	display: flex;
+	gap: 6px;
+	padding: 10px 16px;
+	background: var(--panel-soft);
+	border-bottom: 1px solid var(--border);
+}
+
+.params-tab {
+	min-height: 34px;
+	padding: 0 12px;
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 800;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	cursor: pointer;
+}
+
+.params-tab.is-active {
+	color: var(--accent);
+	background: #ffffff;
+	border-color: var(--border);
+}
+
+.params-dialog-body {
+	overflow: auto;
+	padding: 16px;
+}
+
+.params-form-section,
+.params-subsection,
+.params-column,
+.params-child,
+.params-mini-section {
+	display: grid;
+	gap: 12px;
+}
+
+.params-form-section {
+	gap: 16px;
+}
+
+.params-subsection,
+.params-column,
+.params-child,
+.params-mini-section {
+	padding: 12px;
+	background: var(--panel-soft);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+}
+
+.params-subsection h3,
+.params-card-header h4,
+.params-mini-section h5 {
+	margin: 0;
+	color: var(--text);
+	font-size: 13px;
+	line-height: 1.25;
+}
+
+.params-card-header,
+.params-subsection-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.params-handler-grid,
+.params-two-col,
+.params-column-groups {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.params-handler,
+.params-checkbox-stack {
+	display: grid;
+	gap: 8px;
+}
+
+.params-checkbox-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.params-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 34px;
+	padding: 8px 10px;
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 700;
+	background: #ffffff;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+}
+
+.params-checkbox input {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+}
+
+.params-column textarea,
+.params-handler textarea,
+.params-json-textarea {
+	min-height: 96px;
+	font-family: "Cascadia Code", Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.params-json-textarea {
+	min-height: 520px;
+}
+
+.params-remove-button {
+	min-height: 30px;
+	padding: 0 10px;
+	color: var(--danger);
+	font-size: 12px;
+	font-weight: 800;
+	background: #fffafa;
+	border: 1px solid #fecdca;
+	border-radius: 7px;
+	cursor: pointer;
+}
+
+.params-relation-column {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+	align-items: end;
+	gap: 10px;
+}
+
+@media (max-width: 820px) {
+	.params-dialog {
+		max-height: calc(100vh - 20px);
+	}
+
+	.params-modal {
+		padding: 10px;
+	}
+
+	.params-field,
+	.params-handler-grid,
+	.params-two-col,
+	.params-column-groups,
+	.params-checkbox-grid,
+	.params-relation-column {
+		grid-template-columns: 1fr;
+	}
+
+	.params-dialog-header,
+	.params-dialog-footer {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}

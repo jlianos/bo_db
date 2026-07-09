@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Menu Builder</title>
     <link rel="stylesheet" href="./app.css">
+    <link rel="stylesheet" href="./params-editor.css">
 </head>
 
 <body>
@@ -95,10 +96,16 @@
                         </label>
                     </div>
 
-                    <label class="field">
-                        <span>Params JSON</span>
-                        <textarea id="itemParams" name="params" rows="8" spellcheck="false"></textarea>
-                    </label>
+                    <div class="field">
+                        <span>Params</span>
+                        <input id="itemParams" name="params" type="hidden">
+                        <div class="params-field">
+                            <button id="openParamsEditor" type="button" class="secondary-button params-summary">
+                                <span id="paramsSummary">No params configured</span>
+                            </button>
+                            <button id="clearParams" type="button" class="secondary-button">Clear</button>
+                        </div>
+                    </div>
 
                     <div class="form-actions">
                         <button id="resetItemForm" type="button" class="secondary-button">Reset</button>
@@ -111,6 +118,7 @@
         <div id="statusMessage" class="status" role="status"></div>
     </div>
 
+    <script src="./params-editor.js"></script>
     <script src="./app.js"></script>
 </body>
 

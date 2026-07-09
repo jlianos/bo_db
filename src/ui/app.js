@@ -23,8 +23,11 @@ const elements = {
 	itemKind: document.getElementById("itemKind"),
 	itemParams: document.getElementById("itemParams"),
 	itemText: document.getElementById("itemText"),
+	openParamsEditor: document.getElementById("openParamsEditor"),
+	clearParams: document.getElementById("clearParams"),
 	menuSelect: document.getElementById("menuSelect"),
 	menuTree: document.getElementById("menuTree"),
+	paramsSummary: document.getElementById("paramsSummary"),
 	placementCount: document.getElementById("placementCount"),
 	resetItemForm: document.getElementById("resetItemForm"),
 	saveItemButton: document.getElementById("saveItemButton"),
@@ -32,6 +35,14 @@ const elements = {
 	selectedMenuTitle: document.getElementById("selectedMenuTitle"),
 	statusMessage: document.getElementById("statusMessage"),
 };
+
+const paramsEditor = window.createParamsEditor({
+	input: elements.itemParams,
+	summary: elements.paramsSummary,
+	openButton: elements.openParamsEditor,
+	clearButton: elements.clearParams,
+	onError: showError,
+});
 
 async function api(url, options = {}) {
 	const res = await fetch(url, {
@@ -233,6 +244,7 @@ function fillItemForm(item) {
 	elements.itemIconColor.value = escapeColor(item.iconColor);
 	elements.itemKind.value = item.kind ?? "ITEM";
 	elements.itemParams.value = item.params ? JSON.stringify(item.params, null, 2) : "";
+	paramsEditor.refresh();
 }
 
 function clearItemForm() {
@@ -240,6 +252,7 @@ function clearItemForm() {
 	elements.itemIconColor.value = "#64748b";
 	elements.itemKind.value = "ITEM";
 	elements.itemParams.value = "";
+	paramsEditor.refresh();
 }
 
 async function saveItemDefinition(event) {
@@ -692,6 +705,8 @@ function setLoading(isLoading) {
 	elements.menuSelect.disabled = isLoading;
 	elements.saveItemButton.disabled = isLoading;
 	elements.resetItemForm.disabled = isLoading;
+	elements.openParamsEditor.disabled = isLoading;
+	elements.clearParams.disabled = isLoading;
 }
 
 function showStatus(message) {
