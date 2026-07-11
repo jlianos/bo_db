@@ -91,9 +91,10 @@ const ColumnParamsSchema = v.pipe(
 		lookup: v.optional(
 			v.object({
 				enabled: v.optional(v.boolean(), false),
+				multiple: v.optional(v.boolean(), false),
 				handler: v.optional(HandlerSchema, { kind: "query", src: "" }),
 			}),
-			{ enabled: false, handler: { kind: "query", src: "" } },
+			{ enabled: false, multiple: false, handler: { kind: "query", src: "" } },
 		),
 	}),
 	v.transform((input) => ({ ...input, label: input.label ?? input.name })),

@@ -62,6 +62,7 @@ type ColumnParams = {
 
 	lookup: {
 		enabled: boolean;
+		multiple: boolean;
 		handler: Handler;
 	};
 };
