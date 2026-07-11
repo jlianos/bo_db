@@ -414,6 +414,7 @@
 			<section class="params-mini-section" data-role="lookup">
 				<h5>Lookup</h5>
 				${renderCheckbox("lookup-enabled", "Enabled", lookup.enabled)}
+				${renderCheckbox("lookup-multiple", "Multiple", lookup.multiple)}
 				${renderHandler("lookup", lookup.handler)}
 			</section>
 		`;
@@ -564,6 +565,7 @@
 			},
 			lookup: {
 				enabled: readChecked(lookup, "lookup-enabled"),
+				multiple: readChecked(lookup, "lookup-multiple"),
 				handler: readHandler(lookup.querySelector('[data-handler="lookup"]')),
 			},
 		};
@@ -679,6 +681,7 @@
 			},
 			lookup: {
 				enabled: Boolean(lookup.enabled),
+				multiple: Boolean(lookup.multiple),
 				handler: normalizeHandler(lookup.handler),
 			},
 		};
