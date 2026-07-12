@@ -24,7 +24,7 @@ export type Operator =
 
 type HandlerKind = "query" | "function-query" | "function-data";
 
-type Handler = {
+export type Handler = {
 	kind: HandlerKind;
 	src: string;
 };
@@ -79,10 +79,10 @@ export type RelationParams = {
 
 type MenuItemParamsChild = {
 	relation: RelationParams;
-	params: Omit<MenuItemParams, "children">;
+	params: MenuItemParamsBase;
 };
 
-export type MenuItemParams = {
+export type MenuItemParamsBase = {
 	tableName: string;
 
 	columns: ColumnParams[];
@@ -100,5 +100,9 @@ export type MenuItemParams = {
 		delete: boolean;
 	};
 
+	children: MenuItemParamsChild[];
+};
+
+export type MenuItemParams = MenuItemParamsBase & {
 	children: MenuItemParamsChild[];
 };

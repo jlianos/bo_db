@@ -1,4 +1,4 @@
-import type { MenuItemParams } from "../models/menu-item-params.models.js";
+import type { Handler, MenuItemParams, MenuItemParamsBase } from "../models/menu-item-params.models.js";
 import type {
 	HandlerInput,
 	HandlerResult,
@@ -7,9 +7,6 @@ import type {
 	RuntimeMenuItemParams,
 	RuntimeMenuItemParamsBase,
 } from "../models/menu-item-params.runtime.models.js";
-
-type RawHandler = MenuItemParams["handlers"]["select"];
-type RawParamsWithoutChildren = Omit<MenuItemParams, "children">;
 
 export function transformMenuItemParams(params: MenuItemParams): RuntimeMenuItemParams {
 	return {
@@ -21,7 +18,7 @@ export function transformMenuItemParams(params: MenuItemParams): RuntimeMenuItem
 	};
 }
 
-function transformParams(params: RawParamsWithoutChildren): RuntimeMenuItemParamsBase {
+function transformParams(params: MenuItemParamsBase): RuntimeMenuItemParamsBase {
 	return {
 		...params,
 		handlers: {
@@ -44,7 +41,7 @@ function transformColumn(column: MenuItemParams["columns"][number]): RuntimeColu
 	};
 }
 
-function transformHandler(handler: RawHandler): RuntimeHandler {
+function transformHandler(handler: Handler): RuntimeHandler {
 	switch (handler.kind) {
 		case "query":
 			return {
