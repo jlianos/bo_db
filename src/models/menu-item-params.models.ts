@@ -82,7 +82,7 @@ type MenuItemParamsChild = {
 	params: MenuItemParamsBase;
 };
 
-export type MenuItemParamsBase = {
+export type MenuItemParams = {
 	tableName: string;
 
 	columns: ColumnParams[];
@@ -103,6 +103,4 @@ export type MenuItemParamsBase = {
 	children: MenuItemParamsChild[];
 };
 
-export type MenuItemParams = MenuItemParamsBase & {
-	children: MenuItemParamsChild[];
-};
+export type MenuItemParamsBase = Omit<MenuItemParams, "children">;
