@@ -1,6 +1,6 @@
-type ColumnType = "boolean" | "date" | "datetime" | "number" | "text" | "time" | "code";
+export type ColumnType = "boolean" | "date" | "datetime" | "number" | "text" | "time" | "code";
 
-type Operator =
+export type Operator =
 	| "equals"
 	| "notEquals"
 	| "contains"
@@ -67,12 +67,12 @@ type ColumnParams = {
 	};
 };
 
-type RelationColumnMap = {
+export type RelationColumnMap = {
 	parentColumn: string;
 	childColumn: string;
 };
 
-type RelationParams = {
+export type RelationParams = {
 	name: string;
 	columns: RelationColumnMap[];
 };
