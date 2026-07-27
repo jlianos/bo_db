@@ -1,28 +1,32 @@
+import * as v from "valibot";
 import { MenuItemKind } from "../generated/prisma/browser.js";
+import { type MenuItemParams, MenuItemParamsSchema } from "../models/menu-item-params.valibot.models.js";
 import { prisma } from "./prisma.js";
 
 async function main() {
+	const itemData = [
+		createItemData("dashboard", "Dashboard", "home", "#3b82f6"),
+		createItemData("customers", "Customers", "users", "#10b981"),
+		createItemData("suppliers", "Suppliers", "truck", "#8b5cf6"),
+		createItemData("products", "Products", "box", "#f59e0b"),
+		createItemData("sales", "Sales", "chart-line", "#ef4444"),
+		createItemData("purchases", "Purchases", "shopping-cart", "#06b6d4"),
+		createItemData("inventory", "Inventory", "warehouse", "#6366f1"),
+		createItemData("reports", "Reports", "chart-bar", "#84cc16", MenuItemKind.FOLDER),
+		createItemData("settings", "Settings", "cog", "#6b7280", MenuItemKind.FOLDER),
+		createItemData("users", "Users", "user", "#ec4899"),
+		createItemData("roles", "Roles", "shield", "#14b8a6"),
+		createItemData("audit", "Audit Log", "history", "#f97316"),
+		createItemData("production", "Production", "industry", "#22c55e"),
+		createItemData("workorders", "Work Orders", "tasks", "#a855f7"),
+		createItemData("analytics", "Analytics", "chart-pie", "#0ea5e9"),
+	];
+
 	await prisma.menuItemPerMenu.deleteMany();
 	await prisma.menu.deleteMany();
 	await prisma.menuItem.deleteMany();
 
-	const items = await Promise.all([
-		createItem("dashboard", "Dashboard", "home", "#3b82f6"),
-		createItem("customers", "Customers", "users", "#10b981"),
-		createItem("suppliers", "Suppliers", "truck", "#8b5cf6"),
-		createItem("products", "Products", "box", "#f59e0b"),
-		createItem("sales", "Sales", "chart-line", "#ef4444"),
-		createItem("purchases", "Purchases", "shopping-cart", "#06b6d4"),
-		createItem("inventory", "Inventory", "warehouse", "#6366f1"),
-		createItem("reports", "Reports", "chart-bar", "#84cc16", MenuItemKind.FOLDER),
-		createItem("settings", "Settings", "cog", "#6b7280", MenuItemKind.FOLDER),
-		createItem("users", "Users", "user", "#ec4899"),
-		createItem("roles", "Roles", "shield", "#14b8a6"),
-		createItem("audit", "Audit Log", "history", "#f97316"),
-		createItem("production", "Production", "industry", "#22c55e"),
-		createItem("workorders", "Work Orders", "tasks", "#a855f7"),
-		createItem("analytics", "Analytics", "chart-pie", "#0ea5e9"),
-	]);
+	const items = await Promise.all(itemData.map((data) => prisma.menuItem.create({ data })));
 
 	const byCode = new Map(items.map((item) => [item.code, item]));
 
@@ -214,21 +218,329 @@ async function main() {
 	console.log("Seed completed");
 }
 
-function createItem(
+function createItemData(
 	code: string,
 	text: string,
 	icon: string,
 	iconColor: string,
 	kind: MenuItemKind = MenuItemKind.ITEM,
 ) {
-	return prisma.menuItem.create({
-		data: {
-			code,
-			text,
-			icon,
-			iconColor,
-			kind,
+	return {
+		code,
+		text,
+		icon,
+		iconColor,
+		kind,
+		params: kind === MenuItemKind.ITEM ? createItemParams(code, text) : undefined,
+	};
+}
+
+function createItemParams(code: string, text: string): MenuItemParams {
+	const tableName = code.replaceAll("-", "_");
+	const childTableName = `${tableName}_notes`;
+
+	return v.parse(MenuItemParamsSchema, {
+		tableName,
+		columns: [
+			{
+				name: "id",
+				label: "ID",
+				type: "number",
+				primaryKey: true,
+				visible: true,
+				sortable: true,
+				filterable: true,
+				retrieve: {
+					enabled: true,
+					criteria: {
+						enabled: true,
+						required: false,
+						operators: ["equals", "in", "greaterThan", "lessThan"],
+						defaultOperator: "equals",
+					},
+				},
+				insert: { enabled: false, required: false },
+				update: { enabled: false, required: false },
+				lookup: {
+					enabled: false,
+					multiple: false,
+					handler: { kind: "query", src: "" },
+				},
+			},
+			{
+				name: "name",
+				label: `${text} name`,
+				type: "text",
+				primaryKey: false,
+				visible: true,
+				sortable: true,
+				filterable: true,
+				retrieve: {
+					enabled: true,
+					criteria: {
+						enabled: true,
+						required: false,
+						operators: ["contains", "startsWith", "equals", "notEquals"],
+						defaultOperator: "contains",
+					},
+				},
+				insert: { enabled: true, required: true },
+				update: { enabled: true, required: true },
+				lookup: {
+					enabled: false,
+					multiple: false,
+					handler: { kind: "query", src: "" },
+				},
+			},
+			{
+				name: "status",
+				label: "Status",
+				type: "text",
+				primaryKey: false,
+				visible: true,
+				sortable: true,
+				filterable: true,
+				retrieve: {
+					enabled: true,
+					criteria: {
+						enabled: true,
+						required: false,
+						operators: ["equals", "notEquals", "in", "notIn"],
+						defaultOperator: "equals",
+					},
+				},
+				insert: { enabled: true, required: true },
+				update: { enabled: true, required: false },
+				lookup: {
+					enabled: true,
+					multiple: false,
+					handler: {
+						kind: "function-query",
+						src: `({ includeInactive = false }) => includeInactive
+	? "SELECT code, label FROM ${tableName}_statuses ORDER BY label"
+	: "SELECT code, label FROM ${tableName}_statuses WHERE active = 1 ORDER BY label"`,
+					},
+				},
+			},
+			{
+				name: "active",
+				label: "Active",
+				type: "boolean",
+				primaryKey: false,
+				visible: true,
+				sortable: true,
+				filterable: true,
+				retrieve: {
+					enabled: true,
+					criteria: {
+						enabled: true,
+						required: false,
+						operators: ["equals", "notEquals"],
+						defaultOperator: "equals",
+					},
+				},
+				insert: { enabled: true, required: false },
+				update: { enabled: true, required: false },
+				lookup: {
+					enabled: false,
+					multiple: false,
+					handler: { kind: "query", src: "" },
+				},
+			},
+			{
+				name: "createdAt",
+				label: "Created at",
+				type: "datetime",
+				primaryKey: false,
+				visible: true,
+				sortable: true,
+				filterable: true,
+				retrieve: {
+					enabled: true,
+					criteria: {
+						enabled: true,
+						required: false,
+						operators: ["between", "greaterThanOrEqual", "lessThanOrEqual"],
+						defaultOperator: "between",
+					},
+				},
+				insert: { enabled: false, required: false },
+				update: { enabled: false, required: false },
+				lookup: {
+					enabled: false,
+					multiple: false,
+					handler: { kind: "query", src: "" },
+				},
+			},
+			{
+				name: "metadata",
+				label: "Metadata",
+				type: "code",
+				primaryKey: false,
+				visible: false,
+				sortable: false,
+				filterable: false,
+				retrieve: {
+					enabled: true,
+					criteria: {
+						enabled: false,
+						required: false,
+						operators: ["json", "plaintext"],
+						defaultOperator: "json",
+					},
+				},
+				insert: { enabled: true, required: false },
+				update: { enabled: true, required: false },
+				lookup: {
+					enabled: false,
+					multiple: false,
+					handler: { kind: "query", src: "" },
+				},
+			},
+		],
+		handlers: {
+			select: {
+				kind: "function-query",
+				src: `({ includeInactive = false }) => includeInactive
+	? "SELECT * FROM ${tableName} ORDER BY name"
+	: "SELECT * FROM ${tableName} WHERE active = 1 ORDER BY name"`,
+			},
+			insert: {
+				kind: "query",
+				src: `INSERT INTO ${tableName} (name, status, active, metadata)
+VALUES (:name, :status, :active, :metadata)`,
+			},
+			update: {
+				kind: "function-query",
+				src: `({ id = 0 }) => "UPDATE ${tableName} SET updated_at = CURRENT_TIMESTAMP WHERE id = " + Number(id)`,
+			},
+			delete: {
+				kind: "function-data",
+				src: `({ id = 0 }) => ({
+	success: true,
+	data: [{ id: Number(id), status: "delete-preview" }]
+})`,
+			},
 		},
+		permissions: {
+			insert: true,
+			update: true,
+			delete: true,
+		},
+		children: [
+			{
+				relation: {
+					name: `${text} notes`,
+					columns: [{ parentColumn: "id", childColumn: `${tableName}_id` }],
+				},
+				params: {
+					tableName: childTableName,
+					columns: [
+						{
+							name: "id",
+							label: "Note ID",
+							type: "number",
+							primaryKey: true,
+							visible: false,
+							sortable: true,
+							filterable: false,
+							retrieve: {
+								enabled: true,
+								criteria: {
+									enabled: false,
+									required: false,
+									operators: ["equals"],
+									defaultOperator: "equals",
+								},
+							},
+							insert: { enabled: false, required: false },
+							update: { enabled: false, required: false },
+							lookup: {
+								enabled: false,
+								multiple: false,
+								handler: { kind: "query", src: "" },
+							},
+						},
+						{
+							name: `${tableName}_id`,
+							label: `${text} ID`,
+							type: "number",
+							primaryKey: false,
+							visible: false,
+							sortable: false,
+							filterable: true,
+							retrieve: {
+								enabled: true,
+								criteria: {
+									enabled: true,
+									required: true,
+									operators: ["equals"],
+									defaultOperator: "equals",
+								},
+							},
+							insert: { enabled: true, required: true },
+							update: { enabled: false, required: false },
+							lookup: {
+								enabled: false,
+								multiple: false,
+								handler: { kind: "query", src: "" },
+							},
+						},
+						{
+							name: "note",
+							label: "Note",
+							type: "text",
+							primaryKey: false,
+							visible: true,
+							sortable: false,
+							filterable: true,
+							retrieve: {
+								enabled: true,
+								criteria: {
+									enabled: true,
+									required: false,
+									operators: ["contains", "notContains"],
+									defaultOperator: "contains",
+								},
+							},
+							insert: { enabled: true, required: true },
+							update: { enabled: true, required: true },
+							lookup: {
+								enabled: false,
+								multiple: false,
+								handler: { kind: "query", src: "" },
+							},
+						},
+					],
+					handlers: {
+						select: {
+							kind: "query",
+							src: `SELECT * FROM ${childTableName} WHERE ${tableName}_id = :parentId ORDER BY id`,
+						},
+						insert: {
+							kind: "function-query",
+							src: `() => "INSERT INTO ${childTableName} (${tableName}_id, note) VALUES (:parentId, :note)"`,
+						},
+						update: {
+							kind: "function-data",
+							src: `({ id = 0, note = "" }) => ({
+	success: true,
+	data: [{ id: Number(id), note: String(note) }]
+})`,
+						},
+						delete: {
+							kind: "query",
+							src: `DELETE FROM ${childTableName} WHERE id = :id`,
+						},
+					},
+					permissions: {
+						insert: true,
+						update: true,
+						delete: true,
+					},
+				},
+			},
+		],
 	});
 }
 
