@@ -32,6 +32,25 @@ const HandlerSchema = v.object({
 	src: v.optional(v.string(), ""),
 });
 
+const DefaultHandler = () =>
+	({
+		kind: "query",
+		src: "",
+	}) as const;
+
+const LookupConfigSchema = v.object({
+	enabled: v.optional(v.boolean(), false),
+	multiple: v.optional(v.boolean(), false),
+	handler: v.optional(HandlerSchema, DefaultHandler),
+});
+
+const ColumnLookupParamsSchema = v.object({
+	criteria: v.optional(LookupConfigSchema, { enabled: false, multiple: false, handler: DefaultHandler() }),
+	insert: v.optional(LookupConfigSchema, { enabled: false, multiple: false, handler: DefaultHandler() }),
+	update: v.optional(LookupConfigSchema, { enabled: false, multiple: false, handler: DefaultHandler() }),
+	grid: v.optional(v.omit(LookupConfigSchema, ["multiple"]), { enabled: false, handler: DefaultHandler() }),
+});
+
 const ColumnParamsSchema = v.pipe(
 	v.object({
 		name: v.string(),
@@ -88,14 +107,27 @@ const ColumnParamsSchema = v.pipe(
 			{ enabled: true, required: false },
 		),
 
-		lookup: v.optional(
-			v.object({
-				enabled: v.optional(v.boolean(), false),
-				multiple: v.optional(v.boolean(), false),
-				handler: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			}),
-			{ enabled: false, multiple: false, handler: { kind: "query", src: "" } },
-		),
+		lookup: v.optional(ColumnLookupParamsSchema, {
+			criteria: {
+				enabled: false,
+				multiple: false,
+				handler: DefaultHandler(),
+			},
+			insert: {
+				enabled: false,
+				multiple: false,
+				handler: DefaultHandler(),
+			},
+			update: {
+				enabled: false,
+				multiple: false,
+				handler: DefaultHandler(),
+			},
+			grid: {
+				enabled: false,
+				handler: DefaultHandler(),
+			},
+		}),
 	}),
 	v.transform((input) => ({ ...input, label: input.label ?? input.name })),
 );
@@ -117,16 +149,16 @@ const MenuItemParamsChildSchema = v.object({
 
 	handlers: v.optional(
 		v.object({
-			select: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			insert: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			update: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			delete: v.optional(HandlerSchema, { kind: "query", src: "" }),
+			select: v.optional(HandlerSchema, DefaultHandler()),
+			insert: v.optional(HandlerSchema, DefaultHandler()),
+			update: v.optional(HandlerSchema, DefaultHandler()),
+			delete: v.optional(HandlerSchema, DefaultHandler()),
 		}),
 		{
-			select: { kind: "query", src: "" },
-			insert: { kind: "query", src: "" },
-			update: { kind: "query", src: "" },
-			delete: { kind: "query", src: "" },
+			select: DefaultHandler(),
+			insert: DefaultHandler(),
+			update: DefaultHandler(),
+			delete: DefaultHandler(),
 		},
 	),
 
@@ -141,33 +173,7 @@ const MenuItemParamsChildSchema = v.object({
 });
 
 const MenuItemParamsSchema = v.object({
-	tableName: v.optional(v.string(), ""),
-
-	columns: v.optional(v.array(ColumnParamsSchema), []),
-
-	handlers: v.optional(
-		v.object({
-			select: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			insert: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			update: v.optional(HandlerSchema, { kind: "query", src: "" }),
-			delete: v.optional(HandlerSchema, { kind: "query", src: "" }),
-		}),
-		{
-			select: { kind: "query", src: "" },
-			insert: { kind: "query", src: "" },
-			update: { kind: "query", src: "" },
-			delete: { kind: "query", src: "" },
-		},
-	),
-
-	permissions: v.optional(
-		v.object({
-			insert: v.optional(v.boolean(), false),
-			update: v.optional(v.boolean(), false),
-			delete: v.optional(v.boolean(), false),
-		}),
-		{ insert: false, update: false, delete: false },
-	),
+	...MenuItemParamsChildSchema.entries,
 
 	children: v.optional(
 		v.array(
