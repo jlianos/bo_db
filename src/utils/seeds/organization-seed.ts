@@ -1,4 +1,3 @@
-import { MenuItemKind } from "../../generated/prisma/browser.js";
 import { transformMenuItemParams } from "../menu-item-params.transformer.js";
 import { prisma } from "../prisma.js";
 import type { SeedItemLookup } from "./menu-items-seed.js";
@@ -7,10 +6,10 @@ import {
 	createColumn,
 	createConfiguredItemData,
 	createDeletePreviewHandler,
+	createFolderItemData,
 	createFullPermissions,
 	createFunctionDataLookup,
 	createFunctionQueryLookup,
-	createItemData,
 	createQueryLookup,
 	parseMenuItemParams,
 	type SeedMenuItemData,
@@ -20,8 +19,8 @@ export function createOrganizationItemData(): SeedMenuItemData[] {
 	const params = createMockDatabaseParams();
 
 	return [
-		createItemData("workforce", "Workforce", "users", "#2563eb", MenuItemKind.FOLDER),
-		createItemData("project-management", "Project Management", "diagram-project", "#7c3aed", MenuItemKind.FOLDER),
+		createFolderItemData("workforce", "Workforce", "users", "#2563eb"),
+		createFolderItemData("project-management", "Project Management", "diagram-project", "#7c3aed"),
 		createConfiguredItemData("departments", "Departments", "building", "#0f766e", params.departments),
 		createConfiguredItemData("job-titles", "Job Titles", "id-badge", "#0369a1", params.jobTitles),
 		createConfiguredItemData("employees", "Employees", "address-card", "#2563eb", params.employees),
@@ -139,12 +138,12 @@ ORDER BY department_name`,
 			insert: {
 				kind: "query",
 				src: `INSERT INTO departments (department_name, location, annual_budget)
-VALUES (@department_name, @location, @annual_budget)`,
+VALUES (@{department_name}, @{location}, @{annual_budget})`,
 			},
 			update: {
 				kind: "function-query",
 				src: `({ department_id = 0 }) =>
-	"UPDATE departments SET department_name = @department_name, location = @location, annual_budget = @annual_budget WHERE department_id = " +
+	"UPDATE departments SET department_name = @{department_name}, location = @{location}, annual_budget = @{annual_budget} WHERE department_id = " +
 	Number(department_id)`,
 			},
 			delete: createDeletePreviewHandler("department_id"),
@@ -191,13 +190,13 @@ VALUES (@department_name, @location, @annual_budget)`,
 			insert: {
 				kind: "query",
 				src: `INSERT INTO job_titles (job_title_name, min_salary, max_salary)
-VALUES (@job_title_name, @min_salary, @max_salary)`,
+VALUES (@{job_title_name}, @{min_salary}, @{max_salary})`,
 			},
 			update: {
 				kind: "query",
 				src: `UPDATE job_titles
-SET job_title_name = @job_title_name, min_salary = @min_salary, max_salary = @max_salary
-WHERE job_title_id = @job_title_id`,
+SET job_title_name = @{job_title_name}, min_salary = @{min_salary}, max_salary = @{max_salary}
+WHERE job_title_id = @{job_title_id}`,
 			},
 			delete: createDeletePreviewHandler("job_title_id"),
 		},
@@ -301,24 +300,24 @@ WHERE job_title_id = @job_title_id`,
 	department_id, job_title_id, manager_id, first_name, last_name,
 	email, phone, hire_date, salary, employment_status
 ) VALUES (
-	@department_id, @job_title_id, @manager_id, @first_name, @last_name,
-	@email, @phone, @hire_date, @salary, @employment_status
+	@{department_id}, @{job_title_id}, @{manager_id}, @{first_name}, @{last_name},
+	@{email}, @{phone}, @{hire_date}, @{salary}, @{employment_status}
 )`,
 			},
 			update: {
 				kind: "query",
 				src: `UPDATE employees
-SET department_id = @department_id,
-	job_title_id = @job_title_id,
-	manager_id = @manager_id,
-	first_name = @first_name,
-	last_name = @last_name,
-	email = @email,
-	phone = @phone,
-	hire_date = @hire_date,
-	salary = @salary,
-	employment_status = @employment_status
-WHERE employee_id = @employee_id`,
+SET department_id = @{department_id},
+	job_title_id = @{job_title_id},
+	manager_id = @{manager_id},
+	first_name = @{first_name},
+	last_name = @{last_name},
+	email = @{email},
+	phone = @{phone},
+	hire_date = @{hire_date},
+	salary = @{salary},
+	employment_status = @{employment_status}
+WHERE employee_id = @{employee_id}`,
 			},
 			delete: createDeletePreviewHandler("employee_id"),
 		},
@@ -392,13 +391,13 @@ ORDER BY start_date DESC, project_name`,
 				src: `INSERT INTO projects (
 	department_id, project_name, start_date, end_date, budget, project_status
 ) VALUES (
-	@department_id, @project_name, @start_date, @end_date, @budget, @project_status
+	@{department_id}, @{project_name}, @{start_date}, @{end_date}, @{budget}, @{project_status}
 )`,
 			},
 			update: {
 				kind: "function-query",
 				src: `({ project_id = 0 }) =>
-	"UPDATE projects SET department_id = @department_id, project_name = @project_name, start_date = @start_date, end_date = @end_date, budget = @budget, project_status = @project_status WHERE project_id = " +
+	"UPDATE projects SET department_id = @{department_id}, project_name = @{project_name}, start_date = @{start_date}, end_date = @{end_date}, budget = @{budget}, project_status = @{project_status} WHERE project_id = " +
 	Number(project_id)`,
 			},
 			delete: createDeletePreviewHandler("project_id"),
@@ -416,6 +415,7 @@ ORDER BY start_date DESC, project_name`,
 				updateEnabled: false,
 				lookup: createQueryLookup(
 					"SELECT employee_id AS value, first_name + ' ' + last_name AS label FROM employees ORDER BY last_name, first_name",
+					{ update: false },
 				),
 			}),
 			createColumn("project_id", "Project", "number", {
@@ -424,6 +424,7 @@ ORDER BY start_date DESC, project_name`,
 				updateEnabled: false,
 				lookup: createQueryLookup(
 					"SELECT project_id AS value, project_name AS label FROM projects ORDER BY project_name",
+					{ update: false },
 				),
 			}),
 			createColumn("assigned_date", "Assigned date", "date", {
@@ -466,17 +467,17 @@ ORDER BY start_date DESC, project_name`,
 				src: `INSERT INTO employee_projects (
 	employee_id, project_id, assigned_date, role_name, allocation_percent, hourly_rate
 ) VALUES (
-	@employee_id, @project_id, @assigned_date, @role_name, @allocation_percent, @hourly_rate
+	@{employee_id}, @{project_id}, @{assigned_date}, @{role_name}, @{allocation_percent}, @{hourly_rate}
 )`,
 			},
 			update: {
 				kind: "query",
 				src: `UPDATE employee_projects
-SET assigned_date = @assigned_date,
-	role_name = @role_name,
-	allocation_percent = @allocation_percent,
-	hourly_rate = @hourly_rate
-WHERE employee_id = @employee_id AND project_id = @project_id`,
+SET assigned_date = @{assigned_date},
+	role_name = @{role_name},
+	allocation_percent = @{allocation_percent},
+	hourly_rate = @{hourly_rate}
+WHERE employee_id = @{employee_id} AND project_id = @{project_id}`,
 			},
 			delete: {
 				kind: "function-data",
