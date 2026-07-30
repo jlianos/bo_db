@@ -413,9 +413,23 @@
 		return `
 			<section class="params-mini-section" data-role="lookup">
 				<h5>Lookup</h5>
-				${renderCheckbox("lookup-enabled", "Enabled", lookup.enabled)}
-				${renderCheckbox("lookup-multiple", "Multiple", lookup.multiple)}
-				${renderHandler("lookup", lookup.handler)}
+				<div class="params-lookup-grid">
+					${renderLookupContext("criteria", "Criteria", lookup.criteria, true)}
+					${renderLookupContext("insert", "Insert", lookup.insert, true)}
+					${renderLookupContext("update", "Update", lookup.update, true)}
+					${renderLookupContext("grid", "Grid", lookup.grid, false)}
+				</div>
+			</section>
+		`;
+	}
+
+	function renderLookupContext(key, label, lookup, includeMultiple) {
+		return `
+			<section class="params-lookup-context" data-lookup-context="${key}">
+				<h6>${label}</h6>
+				${renderCheckbox("enabled", "Enabled", lookup.enabled)}
+				${includeMultiple ? renderCheckbox("multiple", "Multiple", lookup.multiple) : ""}
+				${renderHandler(`lookup-${key}`, lookup.handler)}
 			</section>
 		`;
 	}
@@ -564,11 +578,26 @@
 				required: readChecked(update, "update-required"),
 			},
 			lookup: {
-				enabled: readChecked(lookup, "lookup-enabled"),
-				multiple: readChecked(lookup, "lookup-multiple"),
-				handler: readHandler(lookup.querySelector('[data-handler="lookup"]')),
+				criteria: readLookupContext(lookup, "criteria", true),
+				insert: readLookupContext(lookup, "insert", true),
+				update: readLookupContext(lookup, "update", true),
+				grid: readLookupContext(lookup, "grid", false),
 			},
 		};
+	}
+
+	function readLookupContext(lookup, key, includeMultiple) {
+		const context = lookup.querySelector(`[data-lookup-context="${key}"]`);
+		const value = {
+			enabled: readChecked(context, "enabled"),
+			handler: readHandler(context.querySelector(`[data-handler="lookup-${key}"]`)),
+		};
+
+		if (includeMultiple) {
+			value.multiple = readChecked(context, "multiple");
+		}
+
+		return value;
 	}
 
 	function readHandlers(section) {
@@ -650,7 +679,6 @@
 		const criteria = isObject(retrieve.criteria) ? retrieve.criteria : {};
 		const insert = isObject(input.insert) ? input.insert : {};
 		const update = isObject(input.update) ? input.update : {};
-		const lookup = isObject(input.lookup) ? input.lookup : {};
 		const operators =
 			Array.isArray(criteria.operators) && criteria.operators.length > 0 ? criteria.operators : ["equals"];
 
@@ -679,12 +707,59 @@
 				enabled: update.enabled !== false,
 				required: Boolean(update.required),
 			},
-			lookup: {
-				enabled: Boolean(lookup.enabled),
-				multiple: Boolean(lookup.multiple),
-				handler: normalizeHandler(lookup.handler),
-			},
+			lookup: normalizeLookup(input.lookup),
 		};
+	}
+
+	function normalizeLookup(value) {
+		const input = isObject(value) ? value : {};
+		const contextKeys = ["criteria", "insert", "update", "grid"];
+		const usesContextContract = contextKeys.some((key) => isObject(input[key]));
+
+		if (usesContextContract) {
+			return {
+				criteria: normalizeLookupContext(input.criteria, true),
+				insert: normalizeLookupContext(input.insert, true),
+				update: normalizeLookupContext(input.update, true),
+				grid: normalizeLookupContext(input.grid, false),
+			};
+		}
+
+		const legacy = normalizeLookupContext(input, true);
+
+		return {
+			criteria: cloneLookupContext(legacy, true),
+			insert: cloneLookupContext(legacy, true),
+			update: cloneLookupContext(legacy, true),
+			grid: cloneLookupContext(legacy, false),
+		};
+	}
+
+	function normalizeLookupContext(value, includeMultiple) {
+		const input = isObject(value) ? value : {};
+		const normalized = {
+			enabled: Boolean(input.enabled),
+			handler: normalizeHandler(input.handler),
+		};
+
+		if (includeMultiple) {
+			normalized.multiple = Boolean(input.multiple);
+		}
+
+		return normalized;
+	}
+
+	function cloneLookupContext(value, includeMultiple) {
+		const clone = {
+			enabled: value.enabled,
+			handler: { ...value.handler },
+		};
+
+		if (includeMultiple) {
+			clone.multiple = value.multiple;
+		}
+
+		return clone;
 	}
 
 	function normalizeHandlers(value) {

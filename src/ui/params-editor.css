@@ -143,11 +143,31 @@
 
 .params-subsection h3,
 .params-card-header h4,
-.params-mini-section h5 {
+.params-mini-section h5,
+.params-lookup-context h6 {
 	margin: 0;
 	color: var(--text);
 	font-size: 13px;
 	line-height: 1.25;
+}
+
+.params-mini-section[data-role="lookup"] {
+	grid-column: 1 / -1;
+}
+
+.params-lookup-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.params-lookup-context {
+	display: grid;
+	gap: 8px;
+	padding: 10px;
+	background: #ffffff;
+	border: 1px solid var(--border);
+	border-radius: 8px;
 }
 
 .params-card-header,
@@ -243,6 +263,7 @@
 	.params-handler-grid,
 	.params-two-col,
 	.params-column-groups,
+	.params-lookup-grid,
 	.params-checkbox-grid,
 	.params-relation-column {
 		grid-template-columns: 1fr;
