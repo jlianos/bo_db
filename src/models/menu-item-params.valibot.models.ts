@@ -1,6 +1,10 @@
 import * as v from "valibot";
 
-const ColumnTypeSchema = v.picklist(["boolean", "date", "datetime", "number", "text", "time", "code"]);
+const CodeLanguageSchema = v.picklist(["javascript", "typescript", "sql", "plaintext", "json", "css"]);
+
+const DataColumnTypeSchema = v.picklist(["boolean", "date", "datetime", "number", "text", "time"]);
+
+const ColumnTypeSchema = v.union([DataColumnTypeSchema, v.literal("code")]);
 
 const OperatorSchema = v.picklist([
 	"equals",
@@ -17,12 +21,6 @@ const OperatorSchema = v.picklist([
 	"notBetween",
 	"in",
 	"notIn",
-	"javascript",
-	"typescript",
-	"sql",
-	"plaintext",
-	"json",
-	"css",
 ]);
 
 const HandlerKindSchema = v.picklist(["query", "function-query", "function-data"]);
@@ -56,6 +54,7 @@ const ColumnParamsSchema = v.pipe(
 		name: v.string(),
 		label: v.optional(v.string()),
 		type: v.optional(ColumnTypeSchema, "text"),
+		language: v.optional(CodeLanguageSchema, "plaintext"),
 
 		primaryKey: v.optional(v.boolean(), false),
 
