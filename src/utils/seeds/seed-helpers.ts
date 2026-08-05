@@ -17,6 +17,7 @@ type SeedCriteria = SeedColumn["retrieve"]["criteria"];
 type SeedLookupHandler = SeedColumn["lookup"]["criteria"]["handler"];
 
 type SeedColumnOptions = {
+	language?: SeedColumn["language"];
 	primaryKey?: boolean;
 	visible?: boolean;
 	sortable?: boolean;
@@ -84,6 +85,7 @@ export function createColumn(
 		name,
 		label,
 		type,
+		language: options.language ?? "plaintext",
 		primaryKey: options.primaryKey ?? false,
 		visible: options.visible ?? true,
 		sortable: options.sortable ?? true,

@@ -1,5 +1,6 @@
 (() => {
 	const COLUMN_TYPES = ["boolean", "date", "datetime", "number", "text", "time", "code"];
+	const CODE_LANGUAGES = ["javascript", "typescript", "sql", "plaintext", "json", "css"];
 	const OPERATORS = [
 		"equals",
 		"notEquals",
@@ -15,12 +16,6 @@
 		"notBetween",
 		"in",
 		"notIn",
-		"javascript",
-		"typescript",
-		"sql",
-		"plaintext",
-		"json",
-		"css",
 	];
 	const HANDLER_KINDS = ["query", "function-query", "function-data"];
 	const HANDLER_NAMES = ["select", "insert", "update", "delete"];
@@ -363,6 +358,10 @@
 						<span>Type</span>
 						<select data-field="type">${renderOptions(COLUMN_TYPES, column.type)}</select>
 					</label>
+					<label class="field">
+						<span>Language</span>
+						<select data-field="language">${renderOptions(CODE_LANGUAGES, column.language)}</select>
+					</label>
 					<div class="params-checkbox-stack">
 						${renderCheckbox("primaryKey", "Primary key", column.primaryKey)}
 						${renderCheckbox("visible", "Visible", column.visible)}
@@ -556,6 +555,7 @@
 			name: readValue(column, "name"),
 			label: readValue(column, "label"),
 			type: readValue(column, "type"),
+			language: readValue(column, "language"),
 			primaryKey: readChecked(column, "primaryKey"),
 			visible: readChecked(column, "visible"),
 			sortable: readChecked(column, "sortable"),
@@ -686,6 +686,7 @@
 			name: String(input.name ?? ""),
 			label: String(input.label ?? input.name ?? ""),
 			type: pick(COLUMN_TYPES, input.type, "text"),
+			language: pick(CODE_LANGUAGES, input.language, "plaintext"),
 			primaryKey: Boolean(input.primaryKey),
 			visible: input.visible !== false,
 			sortable: input.sortable !== false,
