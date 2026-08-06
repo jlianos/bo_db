@@ -39,14 +39,33 @@ const DefaultHandler = () =>
 const LookupConfigSchema = v.object({
 	enabled: v.optional(v.boolean(), false),
 	multiple: v.optional(v.boolean(), false),
+	dependsOn: v.optional(v.array(v.string()), []),
 	handler: v.optional(HandlerSchema, DefaultHandler),
 });
 
 const ColumnLookupParamsSchema = v.object({
-	criteria: v.optional(LookupConfigSchema, { enabled: false, multiple: false, handler: DefaultHandler() }),
-	insert: v.optional(LookupConfigSchema, { enabled: false, multiple: false, handler: DefaultHandler() }),
-	update: v.optional(LookupConfigSchema, { enabled: false, multiple: false, handler: DefaultHandler() }),
-	grid: v.optional(v.omit(LookupConfigSchema, ["multiple"]), { enabled: false, handler: DefaultHandler() }),
+	criteria: v.optional(LookupConfigSchema, {
+		enabled: false,
+		multiple: false,
+		dependsOn: [],
+		handler: DefaultHandler(),
+	}),
+	insert: v.optional(LookupConfigSchema, {
+		enabled: false,
+		multiple: false,
+		dependsOn: [],
+		handler: DefaultHandler(),
+	}),
+	update: v.optional(LookupConfigSchema, {
+		enabled: false,
+		multiple: false,
+		dependsOn: [],
+		handler: DefaultHandler(),
+	}),
+	grid: v.optional(v.omit(LookupConfigSchema, ["multiple", "dependsOn"]), {
+		enabled: false,
+		handler: DefaultHandler(),
+	}),
 });
 
 const ColumnParamsSchema = v.pipe(
@@ -110,16 +129,19 @@ const ColumnParamsSchema = v.pipe(
 			criteria: {
 				enabled: false,
 				multiple: false,
+				dependsOn: [],
 				handler: DefaultHandler(),
 			},
 			insert: {
 				enabled: false,
 				multiple: false,
+				dependsOn: [],
 				handler: DefaultHandler(),
 			},
 			update: {
 				enabled: false,
 				multiple: false,
+				dependsOn: [],
 				handler: DefaultHandler(),
 			},
 			grid: {

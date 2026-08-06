@@ -37,8 +37,11 @@ type SeedColumnOptions = {
 type SeedLookupOptions = {
 	criteria?: boolean;
 	criteriaMultiple?: boolean;
+	criteriaDependsOn?: SeedColumn["lookup"]["criteria"]["dependsOn"];
 	insert?: boolean;
+	insertDependsOn?: SeedColumn["lookup"]["insert"]["dependsOn"];
 	update?: boolean;
+	updateDependsOn?: SeedColumn["lookup"]["update"]["dependsOn"];
 	grid?: boolean;
 };
 
@@ -163,16 +166,19 @@ function createLookup(handler: SeedLookupHandler, options: SeedLookupOptions = {
 		criteria: {
 			enabled: options.criteria ?? true,
 			multiple: options.criteriaMultiple ?? true,
+			dependsOn: [...(options.criteriaDependsOn ?? [])],
 			handler: { ...handler },
 		},
 		insert: {
 			enabled: options.insert ?? true,
 			multiple: false,
+			dependsOn: [...(options.insertDependsOn ?? [])],
 			handler: { ...handler },
 		},
 		update: {
 			enabled: options.update ?? true,
 			multiple: false,
+			dependsOn: [...(options.updateDependsOn ?? [])],
 			handler: { ...handler },
 		},
 		grid: {
@@ -189,16 +195,19 @@ function createDisabledLookup(): SeedColumn["lookup"] {
 		criteria: {
 			enabled: false,
 			multiple: false,
+			dependsOn: [],
 			handler: { ...handler },
 		},
 		insert: {
 			enabled: false,
 			multiple: false,
+			dependsOn: [],
 			handler: { ...handler },
 		},
 		update: {
 			enabled: false,
 			multiple: false,
+			dependsOn: [],
 			handler: { ...handler },
 		},
 		grid: {

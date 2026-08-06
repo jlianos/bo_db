@@ -227,10 +227,19 @@ WHERE job_title_id = @{job_title_id}`,
 				),
 			}),
 			createColumn("manager_id", "Manager", "number", {
-				lookup: createFunctionQueryLookup(`({ employee_id = 0 }) =>
+				lookup: createFunctionQueryLookup(
+					`({ employee_id = 0, department_id = 0 }) =>
 	"SELECT employee_id AS value, first_name + ' ' + last_name AS label FROM employees WHERE employee_id <> " +
 	Number(employee_id) +
-	" ORDER BY last_name, first_name"`),
+	" AND department_id = " +
+	Number(department_id) +
+	" ORDER BY last_name, first_name"`,
+					{
+						criteriaDependsOn: ["department_id"],
+						insertDependsOn: ["department_id"],
+						updateDependsOn: ["department_id"],
+					},
+				),
 			}),
 			createColumn("first_name", "First name", "text", {
 				insertRequired: true,

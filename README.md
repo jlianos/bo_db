@@ -165,7 +165,7 @@ Params can describe:
 
 Column types are `boolean`, `date`, `datetime`, `number`, `text`, `time`, or `code`. Code language is a separate property with the supported values `javascript`, `typescript`, `sql`, `plaintext`, `json`, and `css`; it defaults to `plaintext` for every column. Languages are not filter operators.
 
-Lookup configuration is context-specific. Criteria, insert, and update lookups include `multiple`; grid lookup does not. Each context owns an independent handler.
+Lookup configuration is context-specific. Criteria, insert, and update lookups include `multiple` and `dependsOn`; grid lookup includes neither. Each context owns an independent handler. `dependsOn` lists column names whose changes should cause the client to rerun that context's lookup handler.
 
 Handlers use one of three kinds:
 

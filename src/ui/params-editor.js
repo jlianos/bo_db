@@ -422,12 +422,20 @@
 		`;
 	}
 
-	function renderLookupContext(key, label, lookup, includeMultiple) {
+	function renderLookupContext(key, label, lookup, includeInteractiveOptions) {
 		return `
 			<section class="params-lookup-context" data-lookup-context="${key}">
 				<h6>${label}</h6>
 				${renderCheckbox("enabled", "Enabled", lookup.enabled)}
-				${includeMultiple ? renderCheckbox("multiple", "Multiple", lookup.multiple) : ""}
+				${includeInteractiveOptions ? renderCheckbox("multiple", "Multiple", lookup.multiple) : ""}
+				${
+					includeInteractiveOptions
+						? `<label class="field">
+							<span>Depends on columns</span>
+							<input type="text" data-field="dependsOn" value="${escapeAttribute(lookup.dependsOn.join(", "))}" placeholder="department_id, status" autocomplete="off">
+						</label>`
+						: ""
+				}
 				${renderHandler(`lookup-${key}`, lookup.handler)}
 			</section>
 		`;
@@ -586,15 +594,16 @@
 		};
 	}
 
-	function readLookupContext(lookup, key, includeMultiple) {
+	function readLookupContext(lookup, key, includeInteractiveOptions) {
 		const context = lookup.querySelector(`[data-lookup-context="${key}"]`);
 		const value = {
 			enabled: readChecked(context, "enabled"),
 			handler: readHandler(context.querySelector(`[data-handler="lookup-${key}"]`)),
 		};
 
-		if (includeMultiple) {
+		if (includeInteractiveOptions) {
 			value.multiple = readChecked(context, "multiple");
+			value.dependsOn = readStringList(context, "dependsOn");
 		}
 
 		return value;
@@ -627,6 +636,17 @@
 
 	function readChecked(root, field) {
 		return root.querySelector(`[data-field="${field}"]`)?.checked ?? false;
+	}
+
+	function readStringList(root, field) {
+		return [
+			...new Set(
+				readValue(root, field)
+					.split(",")
+					.map((value) => value.trim())
+					.filter(Boolean),
+			),
+		];
 	}
 
 	function parseInputParams(value) {
@@ -736,31 +756,41 @@
 		};
 	}
 
-	function normalizeLookupContext(value, includeMultiple) {
+	function normalizeLookupContext(value, includeInteractiveOptions) {
 		const input = isObject(value) ? value : {};
 		const normalized = {
 			enabled: Boolean(input.enabled),
 			handler: normalizeHandler(input.handler),
 		};
 
-		if (includeMultiple) {
+		if (includeInteractiveOptions) {
 			normalized.multiple = Boolean(input.multiple);
+			normalized.dependsOn = normalizeStringList(input.dependsOn);
 		}
 
 		return normalized;
 	}
 
-	function cloneLookupContext(value, includeMultiple) {
+	function cloneLookupContext(value, includeInteractiveOptions) {
 		const clone = {
 			enabled: value.enabled,
 			handler: { ...value.handler },
 		};
 
-		if (includeMultiple) {
+		if (includeInteractiveOptions) {
 			clone.multiple = value.multiple;
+			clone.dependsOn = [...value.dependsOn];
 		}
 
 		return clone;
+	}
+
+	function normalizeStringList(value) {
+		if (!Array.isArray(value)) {
+			return [];
+		}
+
+		return [...new Set(value.map((item) => String(item).trim()).filter(Boolean))];
 	}
 
 	function normalizeHandlers(value) {
