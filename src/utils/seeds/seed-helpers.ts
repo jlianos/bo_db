@@ -82,7 +82,10 @@ export function createColumn(
 	type: SeedColumnType,
 	options: SeedColumnOptions = {},
 ): SeedColumn {
-	const criteria = createDefaultCriteria(type);
+	const criteria =
+		options.lookup?.criteria.enabled && options.lookup.criteria.multiple
+			? createMultiLookupCriteria()
+			: createDefaultCriteria(type);
 
 	return {
 		name,
@@ -126,13 +129,13 @@ export function createFunctionDataLookup(src: string, options?: SeedLookupOption
 	return createLookup({ kind: "function-data", src }, options);
 }
 
-export function createDeletePreviewHandler(primaryKey: string): MenuItemParams["handlers"]["delete"] {
+export function createDeleteQueryHandler(
+	tableName: string,
+	...primaryKeys: string[]
+): MenuItemParams["handlers"]["delete"] {
 	return {
-		kind: "function-data",
-		src: `({ ${primaryKey} = 0 }) => ({
-	success: true,
-	data: [{ ${primaryKey}: Number(${primaryKey}), action: "delete-preview" }]
-})`,
+		kind: "query",
+		src: `DELETE FROM ${tableName} WHERE ${primaryKeys.map((key) => `${key} = @{${key}}`).join(" AND ")}`,
 	};
 }
 
@@ -250,4 +253,13 @@ function createDefaultCriteria(type: SeedColumnType): SeedCriteria {
 				defaultOperator: "contains",
 			};
 	}
+}
+
+function createMultiLookupCriteria(): SeedCriteria {
+	return {
+		enabled: true,
+		required: false,
+		operators: ["in", "notIn"],
+		defaultOperator: "in",
+	};
 }

@@ -5,7 +5,7 @@ import {
 	createChildRelation,
 	createColumn,
 	createConfiguredItemData,
-	createDeletePreviewHandler,
+	createDeleteQueryHandler,
 	createFolderItemData,
 	createFullPermissions,
 	createFunctionDataLookup,
@@ -146,7 +146,7 @@ VALUES (@{department_name}, @{location}, @{annual_budget})`,
 	"UPDATE departments SET department_name = @{department_name}, location = @{location}, annual_budget = @{annual_budget} WHERE department_id = " +
 	Number(department_id)`,
 			},
-			delete: createDeletePreviewHandler("department_id"),
+			delete: createDeleteQueryHandler("departments", "department_id"),
 		},
 		permissions: createFullPermissions(),
 		children: [],
@@ -181,11 +181,10 @@ VALUES (@{department_name}, @{location}, @{annual_budget})`,
 		],
 		handlers: {
 			select: {
-				kind: "function-query",
-				src: `({ minimumSalary = 0 }) =>
-	"SELECT job_title_id, job_title_name, min_salary, max_salary FROM job_titles WHERE max_salary >= " +
-	Number(minimumSalary) +
-	" ORDER BY job_title_name"`,
+				kind: "query",
+				src: `SELECT job_title_id, job_title_name, min_salary, max_salary
+FROM job_titles
+ORDER BY job_title_name`,
 			},
 			insert: {
 				kind: "query",
@@ -198,7 +197,7 @@ VALUES (@{job_title_name}, @{min_salary}, @{max_salary})`,
 SET job_title_name = @{job_title_name}, min_salary = @{min_salary}, max_salary = @{max_salary}
 WHERE job_title_id = @{job_title_id}`,
 			},
-			delete: createDeletePreviewHandler("job_title_id"),
+			delete: createDeleteQueryHandler("job_titles", "job_title_id"),
 		},
 		permissions: createFullPermissions(),
 		children: [],
@@ -228,12 +227,17 @@ WHERE job_title_id = @{job_title_id}`,
 			}),
 			createColumn("manager_id", "Manager", "number", {
 				lookup: createFunctionQueryLookup(
-					`({ employee_id = 0, department_id = 0 }) =>
-	"SELECT employee_id AS value, first_name + ' ' + last_name AS label FROM employees WHERE employee_id <> " +
-	Number(employee_id) +
-	" AND department_id = " +
-	Number(department_id) +
-	" ORDER BY last_name, first_name"`,
+					`({ employee_id = 0, department_id = [] }) => {
+	const departmentIds = (Array.isArray(department_id) ? department_id : [department_id])
+		.map(Number)
+		.filter((value) => Number.isInteger(value) && value > 0);
+	const employeeId = Array.isArray(employee_id) ? 0 : Number(employee_id);
+	const filters = [departmentIds.length ? "department_id IN (" + departmentIds.join(", ") + ")" : "1 = 0"];
+	if (Number.isInteger(employeeId) && employeeId > 0) filters.push("employee_id <> " + employeeId);
+	return "SELECT employee_id AS value, first_name + ' ' + last_name AS label FROM employees WHERE " +
+		filters.join(" AND ") +
+		" ORDER BY last_name, first_name";
+}`,
 					{
 						criteriaDependsOn: ["department_id"],
 						insertDependsOn: ["department_id"],
@@ -278,8 +282,6 @@ WHERE job_title_id = @{job_title_id}`,
 			createColumn("employment_status", "Employment status", "text", {
 				insertRequired: true,
 				updateRequired: true,
-				operators: ["equals", "notEquals", "in", "notIn"],
-				defaultOperator: "equals",
 				lookup: createFunctionDataLookup(`() => ({
 	success: true,
 	data: [
@@ -298,10 +300,11 @@ WHERE job_title_id = @{job_title_id}`,
 		],
 		handlers: {
 			select: {
-				kind: "function-query",
-				src: `({ includeTerminated = false }) => includeTerminated
-	? "SELECT * FROM employees ORDER BY last_name, first_name"
-	: "SELECT * FROM employees WHERE employment_status <> 'TERMINATED' ORDER BY last_name, first_name"`,
+				kind: "query",
+				src: `SELECT employee_id, department_id, job_title_id, manager_id, first_name, last_name,
+	email, phone, hire_date, salary, employment_status, created_at
+FROM employees
+ORDER BY last_name, first_name`,
 			},
 			insert: {
 				kind: "query",
@@ -328,7 +331,7 @@ SET department_id = @{department_id},
 	employment_status = @{employment_status}
 WHERE employee_id = @{employee_id}`,
 			},
-			delete: createDeletePreviewHandler("employee_id"),
+			delete: createDeleteQueryHandler("employees", "employee_id"),
 		},
 		permissions: createFullPermissions(),
 		children: [],
@@ -374,8 +377,6 @@ WHERE employee_id = @{employee_id}`,
 			createColumn("project_status", "Project status", "text", {
 				insertRequired: true,
 				updateRequired: true,
-				operators: ["equals", "notEquals", "in", "notIn"],
-				defaultOperator: "equals",
 				lookup: createFunctionDataLookup(`() => ({
 	success: true,
 	data: [
@@ -409,7 +410,7 @@ ORDER BY start_date DESC, project_name`,
 	"UPDATE projects SET department_id = @{department_id}, project_name = @{project_name}, start_date = @{start_date}, end_date = @{end_date}, budget = @{budget}, project_status = @{project_status} WHERE project_id = " +
 	Number(project_id)`,
 			},
-			delete: createDeletePreviewHandler("project_id"),
+			delete: createDeleteQueryHandler("projects", "project_id"),
 		},
 		permissions: createFullPermissions(),
 		children: [],
@@ -488,17 +489,7 @@ SET assigned_date = @{assigned_date},
 	hourly_rate = @{hourly_rate}
 WHERE employee_id = @{employee_id} AND project_id = @{project_id}`,
 			},
-			delete: {
-				kind: "function-data",
-				src: `({ employee_id = 0, project_id = 0 }) => ({
-	success: true,
-	data: [{
-		employee_id: Number(employee_id),
-		project_id: Number(project_id),
-		action: "delete-preview"
-	}]
-})`,
-			},
+			delete: createDeleteQueryHandler("employee_projects", "employee_id", "project_id"),
 		},
 		permissions: createFullPermissions(),
 		children: [],
