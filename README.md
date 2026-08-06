@@ -28,7 +28,8 @@ The app lets you manage reusable menu item definitions, place them into differen
 │   ├── server/                 # Express app and routers
 │   ├── tests/                  # Small type/validation checks
 │   ├── ui/                     # Static browser UI
-│   └── utils/                  # Prisma client, seed, menu JSON builder
+│   └── utils/                  # Prisma client, transformers, menu JSON, and seeds
+│       └── seeds/              # Menu-specific seed definitions and shared helpers
 ├── package.json
 ├── prisma.config.ts
 └── tsconfig.json
@@ -74,7 +75,7 @@ Open:
 http://localhost:3000
 ```
 
-The server serves the static UI and API from the same origin.
+The server serves the static UI and API from the same origin. CORS is also enabled so a separately running frontend can call the API during development.
 
 ## Build And Run
 
@@ -104,7 +105,7 @@ Use this only when you intentionally want to reset the migration history and loc
 
 The core tables are:
 
-- `Menu` - a named menu, such as `admin`, `sales`, or `manufacturing`.
+- `Menu` - a named menu, currently seeded with the `organization` menu.
 - `MenuItem` - a reusable item definition with code, text, icon, color, kind, and optional params JSON.
 - `MenuItemPerMenu` - a placement of a reusable item inside a menu. This stores nesting and order.
 
@@ -136,10 +137,16 @@ Placements:
 - `PATCH /api/placements/:placementId`
 - `DELETE /api/placements/:placementId`
 
+Query testing:
+
+- `POST /api/query` with `{ "queryString": "..." }`
+
+The query endpoint currently executes SQL against the configured test SQL Server. It is intended for internal frontend integration testing and is not hardened for public use.
+
 Example JSON export:
 
 ```sh
-curl http://localhost:3000/api/menus/admin/json
+curl http://localhost:3000/api/menus/organization/json
 ```
 
 ## Menu Item Params
@@ -149,12 +156,38 @@ curl http://localhost:3000/api/menus/admin/json
 Params can describe:
 
 - table name
-- columns
+- columns, their data type, and an explicit code `language`
+- retrieve criteria and supported filter operators
 - handlers for select, insert, update, and delete
+- lookup behavior for criteria, insert, update, and grid contexts
 - permissions
 - child relations
 
-When changing this shape, update both the TypeScript type and the Valibot schema.
+Column types are `boolean`, `date`, `datetime`, `number`, `text`, `time`, or `code`. Code language is a separate property with the supported values `javascript`, `typescript`, `sql`, `plaintext`, `json`, and `css`; it defaults to `plaintext` for every column. Languages are not filter operators.
+
+Lookup configuration is context-specific. Criteria, insert, and update lookups include `multiple`; grid lookup does not. Each context owns an independent handler.
+
+Handlers use one of three kinds:
+
+- `query` - stores a query string
+- `function-query` - stores a function that produces a query string
+- `function-data` - stores a function that produces data directly
+
+Function handlers are compiled by `src/utils/menu-item-params.transformer.ts`. Query placeholders in seeded metadata use the `@{column}` format expected by the client transformer.
+
+When changing the params shape, keep these representations synchronized:
+
+- `src/models/menu-item-params.models.ts`
+- `src/models/menu-item-params.valibot.models.ts`
+- `src/models/menu-item-params.runtime.models.ts`
+- `src/ui/params-editor.js`
+- seed helpers and menu-specific seed definitions
+
+## Seed Data
+
+`src/utils/seed.ts` remains the seed entry point. Menu definitions live under `src/utils/seeds`; shared construction and Valibot parsing are provided by `seed-helpers.ts`.
+
+The current seed contains the `organization` menu for departments, job titles, employees, projects, and employee-project assignments. Every params object is parsed through `MenuItemParamsSchema` before being stored. `npm run seed` deletes existing placements, menus, and reusable menu items before recreating this data.
 
 ## Notes
 
@@ -162,4 +195,5 @@ When changing this shape, update both the TypeScript type and the Valibot schema
 - The Prisma client is generated into `src/generated/prisma`.
 - `dist` is build output.
 - The UI in `src/ui` is intentionally framework-free.
+- The built-in params editor uses the same column types, languages, operators, lookup contexts, and defaults as the server contract.
 
