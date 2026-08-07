@@ -517,9 +517,7 @@ async function reorderPlacement(placementId, direction) {
 		return;
 	}
 
-	const siblings = state.placements
-		.filter((item) => item.parentId === placement.parentId)
-		.sort(sortByOrder);
+	const siblings = state.placements.filter((item) => item.parentId === placement.parentId).sort(sortByOrder);
 	const currentIndex = siblings.findIndex((item) => item.id === placementId);
 	const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
@@ -540,7 +538,7 @@ async function reorderPlacement(placementId, direction) {
 					method: "PATCH",
 					body: JSON.stringify({
 						parentId: sibling.parentId,
-						order: index + 1,
+						order: nextSiblings.length - index,
 					}),
 				}),
 			),
@@ -685,7 +683,7 @@ function getNextOrder(parentId) {
 }
 
 function sortByOrder(a, b) {
-	return (a.order ?? 0) - (b.order ?? 0) || a.id - b.id;
+	return (b.order ?? Number.MIN_SAFE_INTEGER) - (a.order ?? Number.MIN_SAFE_INTEGER);
 }
 
 function sortByText(a, b) {

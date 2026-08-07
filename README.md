@@ -114,7 +114,7 @@ The core tables are:
 - `ITEM`
 - `FOLDER`
 
-Folders can contain nested placements. The exported menu JSON is built from the flat placement rows.
+Folders can contain nested placements. The exported menu JSON is built from the flat placement rows. Menu consumers and the authoring UI display higher `order` values first; Move Up/Down renumbers siblings using the same descending convention.
 
 ## API
 
@@ -175,6 +175,8 @@ Handlers use one of three kinds:
 
 Function handlers are compiled by `src/utils/menu-item-params.transformer.ts`. Query placeholders in seeded metadata use the `@{column}` format expected by the client transformer.
 
+Placeholder substitution supplies values only. Seeded mutation handlers own SQL quoting for text and date values, escape handling remains with the client substitution utility, and optional fields explicitly produce SQL `NULL` when empty.
+
 When changing the params shape, keep these representations synchronized:
 
 - `src/models/menu-item-params.models.ts`
@@ -187,7 +189,17 @@ When changing the params shape, keep these representations synchronized:
 
 `src/utils/seed.ts` remains the seed entry point. Menu definitions live under `src/utils/seeds`; shared construction and Valibot parsing are provided by `seed-helpers.ts`.
 
-The current seed contains the `organization` menu for departments, job titles, employees, projects, and employee-project assignments. Every params object is parsed through `MenuItemParamsSchema` before being stored. `npm run seed` deletes existing placements, menus, and reusable menu items before recreating this data.
+The current seed contains the `organization` menu with three sections:
+
+- Workforce: departments, job titles, and employees.
+- Project Management: projects and employee-project assignments.
+- Analysis: read-only department, employee, and project analysis screens backed by `spc_department_analysis`, `spc_employee_analysis`, and `spc_project_analysis`.
+
+The analysis items exercise static `EXEC` retrieval, existing and appended procedure parameters, case-insensitive parameter replacement, placeholder-backed parameters, scalar lookups, required criteria, booleans, and nullable inputs. Procedure criteria use `equals`, matching their scalar parameters.
+
+Project Assignments explicitly enables grid lookups for `employee_id` and `project_id`, allowing clients to display employee and project names while preserving raw IDs. Its retrieval handler is a static `SELECT`, so the client can apply automatic criteria.
+
+Every params object is parsed through `MenuItemParamsSchema` and its function handlers are compiled during seed construction. `npm run seed` deletes existing placements, menus, and reusable menu items before recreating this data.
 
 ## Notes
 
@@ -196,4 +208,5 @@ The current seed contains the `organization` menu for departments, job titles, e
 - `dist` is build output.
 - The UI in `src/ui` is intentionally framework-free.
 - The built-in params editor uses the same column types, languages, operators, lookup contexts, and defaults as the server contract.
+- The built-in menu editor follows the same descending `order` convention as `ng_bo`.
 
