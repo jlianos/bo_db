@@ -245,6 +245,13 @@ function createDefaultCriteria(type: SeedColumnType): SeedCriteria {
 				operators: ["equals", "notEquals"],
 				defaultOperator: "equals",
 			};
+		case "code":
+			return {
+				enabled: true,
+				required: false,
+				operators: ["equals"],
+				defaultOperator: "equals",
+			};
 		default:
 			return {
 				enabled: true,

@@ -1,6 +1,7 @@
 import { transformMenuItemParams } from "../menu-item-params.transformer.js";
 import { prisma } from "../prisma.js";
 import type { SeedItemLookup } from "./menu-items-seed.js";
+import { createOrganizationAnalysisItemData } from "./organization-analysis-seed.js";
 import {
 	createChildRelation,
 	createColumn,
@@ -21,6 +22,7 @@ export function createOrganizationItemData(): SeedMenuItemData[] {
 	return [
 		createFolderItemData("workforce", "Workforce", "users", "#2563eb"),
 		createFolderItemData("project-management", "Project Management", "diagram-project", "#7c3aed"),
+		createFolderItemData("analysis", "Analysis", "chart-simple", "#b45309"),
 		createConfiguredItemData("departments", "Departments", "building", "#0f766e", params.departments),
 		createConfiguredItemData("job-titles", "Job Titles", "id-badge", "#0369a1", params.jobTitles),
 		createConfiguredItemData("employees", "Employees", "address-card", "#2563eb", params.employees),
@@ -32,6 +34,7 @@ export function createOrganizationItemData(): SeedMenuItemData[] {
 			"#9333ea",
 			params.employeeProjects,
 		),
+		...createOrganizationAnalysisItemData(),
 	];
 }
 
@@ -57,6 +60,14 @@ export async function seedOrganizationMenu(item: SeedItemLookup) {
 			menuId: menu.id,
 			menuItemId: item("project-management").id,
 			order: 2,
+		},
+	});
+
+	const analysis = await prisma.menuItemPerMenu.create({
+		data: {
+			menuId: menu.id,
+			menuItemId: item("analysis").id,
+			order: 3,
 		},
 	});
 
@@ -91,6 +102,24 @@ export async function seedOrganizationMenu(item: SeedItemLookup) {
 				menuItemId: item("employee-projects").id,
 				parentId: projectManagement.id,
 				order: 2,
+			},
+			{
+				menuId: menu.id,
+				menuItemId: item("department-analysis").id,
+				parentId: analysis.id,
+				order: 1,
+			},
+			{
+				menuId: menu.id,
+				menuItemId: item("employee-analysis").id,
+				parentId: analysis.id,
+				order: 2,
+			},
+			{
+				menuId: menu.id,
+				menuItemId: item("project-analysis").id,
+				parentId: analysis.id,
+				order: 3,
 			},
 		],
 	});
@@ -136,15 +165,23 @@ FROM departments
 ORDER BY department_name`,
 			},
 			insert: {
-				kind: "query",
-				src: `INSERT INTO departments (department_name, location, annual_budget)
-VALUES (@{department_name}, @{location}, @{annual_budget})`,
+				kind: "function-query",
+				src: `({ location = null }) => {
+	const locationSql = location === null || location === "" ? "NULL" : "N'@{location}'";
+	return "INSERT INTO departments (department_name, location, annual_budget) VALUES (N'@{department_name}', " +
+		locationSql +
+		", @{annual_budget})";
+}`,
 			},
 			update: {
 				kind: "function-query",
-				src: `({ department_id = 0 }) =>
-	"UPDATE departments SET department_name = @{department_name}, location = @{location}, annual_budget = @{annual_budget} WHERE department_id = " +
-	Number(department_id)`,
+				src: `({ department_id = 0, location = null }) => {
+	const locationSql = location === null || location === "" ? "NULL" : "N'@{location}'";
+	return "UPDATE departments SET department_name = N'@{department_name}', location = " +
+		locationSql +
+		", annual_budget = @{annual_budget} WHERE department_id = " +
+		Number(department_id);
+}`,
 			},
 			delete: createDeleteQueryHandler("departments", "department_id"),
 		},
@@ -189,12 +226,12 @@ ORDER BY job_title_name`,
 			insert: {
 				kind: "query",
 				src: `INSERT INTO job_titles (job_title_name, min_salary, max_salary)
-VALUES (@{job_title_name}, @{min_salary}, @{max_salary})`,
+VALUES (N'@{job_title_name}', @{min_salary}, @{max_salary})`,
 			},
 			update: {
 				kind: "query",
 				src: `UPDATE job_titles
-SET job_title_name = @{job_title_name}, min_salary = @{min_salary}, max_salary = @{max_salary}
+SET job_title_name = N'@{job_title_name}', min_salary = @{min_salary}, max_salary = @{max_salary}
 WHERE job_title_id = @{job_title_id}`,
 			},
 			delete: createDeleteQueryHandler("job_titles", "job_title_id"),
@@ -307,29 +344,28 @@ FROM employees
 ORDER BY last_name, first_name`,
 			},
 			insert: {
-				kind: "query",
-				src: `INSERT INTO employees (
-	department_id, job_title_id, manager_id, first_name, last_name,
-	email, phone, hire_date, salary, employment_status
-) VALUES (
-	@{department_id}, @{job_title_id}, @{manager_id}, @{first_name}, @{last_name},
-	@{email}, @{phone}, @{hire_date}, @{salary}, @{employment_status}
-)`,
+				kind: "function-query",
+				src: `({ manager_id = null, phone = null }) => {
+	const managerSql = manager_id === null || manager_id === "" ? "NULL" : "@{manager_id}";
+	const phoneSql = phone === null || phone === "" ? "NULL" : "N'@{phone}'";
+	return "INSERT INTO employees (department_id, job_title_id, manager_id, first_name, last_name, " +
+		"email, phone, hire_date, salary, employment_status) VALUES (" +
+		"@{department_id}, @{job_title_id}, " + managerSql + ", N'@{first_name}', N'@{last_name}', " +
+		"N'@{email}', " + phoneSql + ", '@{hire_date}', @{salary}, '@{employment_status}')";
+}`,
 			},
 			update: {
-				kind: "query",
-				src: `UPDATE employees
-SET department_id = @{department_id},
-	job_title_id = @{job_title_id},
-	manager_id = @{manager_id},
-	first_name = @{first_name},
-	last_name = @{last_name},
-	email = @{email},
-	phone = @{phone},
-	hire_date = @{hire_date},
-	salary = @{salary},
-	employment_status = @{employment_status}
-WHERE employee_id = @{employee_id}`,
+				kind: "function-query",
+				src: `({ manager_id = null, phone = null }) => {
+	const managerSql = manager_id === null || manager_id === "" ? "NULL" : "@{manager_id}";
+	const phoneSql = phone === null || phone === "" ? "NULL" : "N'@{phone}'";
+	return "UPDATE employees SET department_id = @{department_id}, job_title_id = @{job_title_id}, manager_id = " +
+		managerSql +
+		", first_name = N'@{first_name}', last_name = N'@{last_name}', email = N'@{email}', phone = " +
+		phoneSql +
+		", hire_date = '@{hire_date}', salary = @{salary}, employment_status = '@{employment_status}' " +
+		"WHERE employee_id = @{employee_id}";
+}`,
 			},
 			delete: createDeleteQueryHandler("employees", "employee_id"),
 		},
@@ -397,18 +433,24 @@ FROM projects
 ORDER BY start_date DESC, project_name`,
 			},
 			insert: {
-				kind: "query",
-				src: `INSERT INTO projects (
-	department_id, project_name, start_date, end_date, budget, project_status
-) VALUES (
-	@{department_id}, @{project_name}, @{start_date}, @{end_date}, @{budget}, @{project_status}
-)`,
+				kind: "function-query",
+				src: `({ end_date = null }) => {
+	const endDateSql = end_date === null || end_date === "" ? "NULL" : "'@{end_date}'";
+	return "INSERT INTO projects (department_id, project_name, start_date, end_date, budget, project_status) " +
+		"VALUES (@{department_id}, N'@{project_name}', '@{start_date}', " +
+		endDateSql +
+		", @{budget}, '@{project_status}')";
+}`,
 			},
 			update: {
 				kind: "function-query",
-				src: `({ project_id = 0 }) =>
-	"UPDATE projects SET department_id = @{department_id}, project_name = @{project_name}, start_date = @{start_date}, end_date = @{end_date}, budget = @{budget}, project_status = @{project_status} WHERE project_id = " +
-	Number(project_id)`,
+				src: `({ project_id = 0, end_date = null }) => {
+	const endDateSql = end_date === null || end_date === "" ? "NULL" : "'@{end_date}'";
+	return "UPDATE projects SET department_id = @{department_id}, project_name = N'@{project_name}', " +
+		"start_date = '@{start_date}', end_date = " + endDateSql +
+		", budget = @{budget}, project_status = '@{project_status}' WHERE project_id = " +
+		Number(project_id);
+}`,
 			},
 			delete: createDeleteQueryHandler("projects", "project_id"),
 		},
@@ -425,7 +467,7 @@ ORDER BY start_date DESC, project_name`,
 				updateEnabled: false,
 				lookup: createQueryLookup(
 					"SELECT employee_id AS value, first_name + ' ' + last_name AS label FROM employees ORDER BY last_name, first_name",
-					{ update: false },
+					{ update: false, grid: true },
 				),
 			}),
 			createColumn("project_id", "Project", "number", {
@@ -434,7 +476,7 @@ ORDER BY start_date DESC, project_name`,
 				updateEnabled: false,
 				lookup: createQueryLookup(
 					"SELECT project_id AS value, project_name AS label FROM projects ORDER BY project_name",
-					{ update: false },
+					{ update: false, grid: true },
 				),
 			}),
 			createColumn("assigned_date", "Assigned date", "date", {
@@ -462,32 +504,28 @@ ORDER BY start_date DESC, project_name`,
 		],
 		handlers: {
 			select: {
-				kind: "function-query",
-				src: `({ employee_id = 0, project_id = 0 }) => {
-	const filters = [];
-	if (Number(employee_id) > 0) filters.push("employee_id = " + Number(employee_id));
-	if (Number(project_id) > 0) filters.push("project_id = " + Number(project_id));
-	return "SELECT * FROM employee_projects" +
-		(filters.length ? " WHERE " + filters.join(" AND ") : "") +
-		" ORDER BY assigned_date DESC";
-}`,
+				kind: "query",
+				src: `SELECT employee_id, project_id, assigned_date, role_name, allocation_percent, hourly_rate
+FROM employee_projects
+ORDER BY assigned_date DESC`,
 			},
 			insert: {
-				kind: "query",
-				src: `INSERT INTO employee_projects (
-	employee_id, project_id, assigned_date, role_name, allocation_percent, hourly_rate
-) VALUES (
-	@{employee_id}, @{project_id}, @{assigned_date}, @{role_name}, @{allocation_percent}, @{hourly_rate}
-)`,
+				kind: "function-query",
+				src: `({ hourly_rate = null }) => {
+	const hourlyRateSql = hourly_rate === null || hourly_rate === "" ? "NULL" : "@{hourly_rate}";
+	return "INSERT INTO employee_projects (employee_id, project_id, assigned_date, role_name, allocation_percent, hourly_rate) " +
+		"VALUES (@{employee_id}, @{project_id}, '@{assigned_date}', N'@{role_name}', @{allocation_percent}, " +
+		hourlyRateSql + ")";
+}`,
 			},
 			update: {
-				kind: "query",
-				src: `UPDATE employee_projects
-SET assigned_date = @{assigned_date},
-	role_name = @{role_name},
-	allocation_percent = @{allocation_percent},
-	hourly_rate = @{hourly_rate}
-WHERE employee_id = @{employee_id} AND project_id = @{project_id}`,
+				kind: "function-query",
+				src: `({ hourly_rate = null }) => {
+	const hourlyRateSql = hourly_rate === null || hourly_rate === "" ? "NULL" : "@{hourly_rate}";
+	return "UPDATE employee_projects SET assigned_date = '@{assigned_date}', role_name = N'@{role_name}', " +
+		"allocation_percent = @{allocation_percent}, hourly_rate = " + hourlyRateSql +
+		" WHERE employee_id = @{employee_id} AND project_id = @{project_id}";
+}`,
 			},
 			delete: createDeleteQueryHandler("employee_projects", "employee_id", "project_id"),
 		},
